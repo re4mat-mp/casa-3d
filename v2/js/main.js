@@ -642,6 +642,8 @@ $('vPlanta').onclick = () => { if (mode === 'walk') exitWalk();
   if (paperWorld(stage)) { const v = planView(); flyTo(v.p, v.t); return; }
   tRoof.checked = false; setVis(); flyTo([6.3, 48, 5.95], [6.3, 0, 5.9]); };
 $('collapse').onclick = e => { const p = $('panel'); p.classList.toggle('min'); e.target.textContent = p.classList.contains('min') ? '+' : '–'; };
+// On a phone the open panel covers half the house: start it folded (the + opens it).
+if (matchMedia('(max-width: 600px)').matches) $('collapse').click();
 $('hour').addEventListener('input', () => setHour(+$('hour').value));
 // the first switch to a quality compiles its shaders (a few seconds, once): say so before the page freezes
 async function pickQuality(q) { if (q === quality) return; const h = help.textContent; help.textContent = 'Cambiando la calidad… (la primera vez tarda unos segundos)';
