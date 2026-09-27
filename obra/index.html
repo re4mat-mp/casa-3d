@@ -1,0 +1,1041 @@
+<html lang="es">
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Casa en la ladera</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+:root{--paper:#ffffff;--ink:#141414;--ink-2:#5f5f5f;--ink-3:#8c8c8c;--rule:#e3e3e3;--callout:#f4f4f4;--accent:#f28c1e;--mono:"Geist Mono",ui-monospace,Menlo,monospace}
+html,body{height:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:Geist,-apple-system,"Helvetica Neue",Arial,sans-serif;font-size:15px;line-height:1.45;overflow:hidden;-webkit-text-size-adjust:100%}
+.app{height:100%;display:flex;flex-direction:column}
+header{display:flex;align-items:baseline;justify-content:space-between;gap:12px;padding:11px 16px 8px;border-bottom:1px solid var(--rule)}
+header h1{font-size:15px;font-weight:600;margin:0;letter-spacing:-.01em}
+header .sub{display:block;font-size:12.5px;color:var(--ink-2);margin-top:1px}
+header .where{font-family:var(--mono);font-size:12px;color:var(--ink-2);text-align:right;white-space:nowrap;font-variant-numeric:tabular-nums}
+.stage{position:relative;flex:1;min-height:200px;overflow:hidden}
+#c{display:block;width:100%;height:100%;touch-action:none;cursor:grab}
+#c:active{cursor:grabbing}
+.callout{position:absolute;left:12px;top:12px;max-width:calc(100% - 120px);background:var(--callout);border:1px solid var(--rule);border-radius:2px;padding:7px 9px 6px}
+.callout[hidden]{display:none}
+.callout .h{font-family:var(--mono);font-size:10.5px;color:var(--ink-3);margin:0 0 5px}
+.callout ul{list-style:none;margin:0;padding:0;display:flex;gap:10px;flex-wrap:wrap;max-width:300px}
+.callout li{width:54px;display:flex;flex-direction:column;align-items:center;gap:2px;cursor:pointer;-webkit-tap-highlight-color:transparent}
+.callout li:active img{border-color:var(--accent)}
+.callout .th{position:relative;width:46px;height:46px}
+.callout img{width:46px;height:46px;display:block;background:#fff;border:1px solid var(--rule);border-radius:2px}
+.callout .q{position:absolute;right:-6px;bottom:-4px;font-family:var(--mono);font-size:10.5px;background:var(--ink);color:#fff;border-radius:2px;padding:1px 4px;line-height:1.3}
+.callout .nm{font-size:10.5px;line-height:1.2;text-align:center;color:var(--ink-2);text-wrap:balance}
+.replay{position:absolute;right:12px;top:12px;height:30px;padding:0 10px;font-size:12.5px;border:1px solid var(--rule);background:var(--paper);color:var(--ink-2)}
+.replay[hidden]{display:none}
+#dims{position:absolute;inset:0;pointer-events:none;overflow:hidden}
+.dim,.note,.mark{position:absolute;left:0;top:0;opacity:0;transition:opacity .35s;will-change:transform;white-space:nowrap}
+.dim,.note{font-family:var(--mono);font-size:11px;line-height:1.2;background:var(--paper);border:1px solid var(--ink);color:var(--ink);padding:1px 5px;border-radius:2px}
+.note{border-color:var(--rule);color:var(--ink-2)}
+.mark{width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font:500 11px/20px var(--mono);text-align:center;box-shadow:0 0 0 1.5px #fff,0 0 0 2.5px var(--ink)}
+.mark i{position:absolute;left:50%;top:50%;height:1px;background:var(--ink);transform-origin:0 50%;box-shadow:0 1px 0 #fff}
+.dim.on,.note.on,.mark.on{opacity:1}
+.plan{position:absolute;right:12px;top:52px;width:84px;height:84px;border:1px solid var(--rule);border-radius:2px;pointer-events:none}
+.plan span{position:absolute;left:5px;top:3px;font-family:var(--mono);font-size:10px;color:var(--ink-3)}
+.bubble{position:absolute;right:12px;bottom:12px;width:116px;height:116px;pointer-events:none;display:none;overflow:hidden}
+.bubble.on{display:block}
+.bubble i{position:absolute;inset:0;border-radius:50%;box-shadow:0 0 0 90px var(--paper);border:1px solid var(--ink);transform-origin:50% 50%}
+.leader,.ring{position:absolute;left:0;top:0;pointer-events:none;display:none}
+.leader{height:1px;background:var(--ink);transform-origin:0 50%}
+.ring{width:18px;height:18px;border-radius:50%;border:1px solid var(--ink);box-shadow:0 0 0 1px #fff inset}
+.bubble.on ~ .leader,.bubble.on ~ .ring{display:block}
+.scale{position:absolute;left:12px;bottom:12px;display:flex;align-items:center;gap:6px;font:11px var(--mono);color:var(--ink);pointer-events:none}
+.scale span{background:var(--paper);padding:0 3px;border-radius:2px}
+.scale i{display:block;height:1px;background:var(--ink);position:relative}
+.scale i::before,.scale i::after{content:"";position:absolute;top:-3px;width:1px;height:7px;background:var(--ink)}
+.scale i::before{left:0}.scale i::after{right:0}
+.progress{height:14px;position:relative;border-top:1px solid var(--rule)}
+.progress i{position:absolute;left:0;top:-1px;height:2px;background:var(--ink);transition:width .5s cubic-bezier(.22,1,.36,1)}
+.progress .ticks{position:absolute;left:0;right:0;top:0;height:14px;display:flex}
+.progress .ticks b{flex:1;position:relative}
+.progress .ticks b::after{content:"";position:absolute;right:0;top:0;width:1px;height:5px;background:var(--rule)}
+.progress .ticks b.done::after{background:var(--ink)}
+.sheet{touch-action:pan-y;padding:10px 16px 6px;display:grid;grid-template-columns:auto minmax(0,1fr);gap:0 14px;align-items:start;max-height:36%;overflow-y:auto;overscroll-behavior:contain}
+.num{font-size:44px;font-weight:600;line-height:.95;letter-spacing:-.03em;font-variant-numeric:tabular-nums;min-width:1.4ch;color:var(--ink)}
+.num small{font-size:13px;font-weight:500;letter-spacing:0;color:var(--ink-2);display:block;margin-top:2px}
+.body{min-width:0;transition:opacity .16s}
+.title{font-weight:600;font-size:16.5px;margin:3px 0 2px;text-wrap:balance;letter-spacing:-.01em}
+.text{margin:0;max-width:64ch}
+.text:empty{display:none}
+.acts{margin:6px 0 0;padding:0;list-style:none;display:grid;gap:5px;max-width:64ch}
+.acts li{display:grid;grid-template-columns:20px minmax(0,1fr);gap:8px;align-items:start}
+.acts b{width:20px;height:20px;border-radius:50%;background:var(--ink);color:#fff;font:500 11px/20px var(--mono);text-align:center;margin-top:1px}
+.acts:empty{display:none}
+.meta{font-family:var(--mono);font-size:12px;color:var(--ink-2);margin-top:6px;font-variant-numeric:tabular-nums}
+.meta:empty{display:none}
+.tip{margin:6px 0 0;font-size:13.5px;color:var(--ink-2);max-width:64ch;padding-left:10px;border-left:2px solid var(--rule)}
+.tip:empty{display:none}
+.inv{margin:8px 0 0;padding:0;list-style:none;display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:6px 14px;font-size:13.5px}
+.inv li{display:flex;gap:8px;align-items:center;padding:3px 0;border-bottom:1px solid var(--rule);min-width:0}
+.inv img{width:34px;height:34px;flex:none;border:1px solid var(--rule);border-radius:2px;background:#fff}
+.inv .q{font-family:var(--mono);color:var(--ink-2);min-width:3.2em;font-variant-numeric:tabular-nums;font-size:12px}
+.inv .nm{min-width:0}
+.grp{font-family:var(--mono);font-size:11px;color:var(--ink-3);margin:12px 0 0}
+.cal{margin:8px 0 0;padding:0;list-style:none;font-size:14px}
+.cal li{display:flex;gap:10px;padding:3px 0;border-bottom:1px solid var(--rule)}
+.cal .d{font-family:var(--mono);color:var(--ink-2);min-width:7.6em;font-variant-numeric:tabular-nums;font-size:12.5px;padding-top:1px}
+.nav{display:grid;grid-template-columns:1fr 2fr;gap:8px;padding:8px 16px calc(12px + env(safe-area-inset-bottom,0px));border-top:1px solid var(--rule)}
+button{font:inherit;font-weight:500;height:52px;border-radius:2px;border:1px solid var(--ink);background:var(--paper);color:var(--ink);cursor:pointer;padding:0 14px;-webkit-tap-highlight-color:transparent}
+button.primary{background:var(--ink);border-color:var(--ink);color:#fff}
+button:disabled{opacity:.35;cursor:default}
+button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+@media (max-width:430px){body{font-size:14.5px}.tip{font-size:13px}.title{font-size:16px}}
+@media (prefers-reduced-motion:reduce){.progress i,.dim,.note,.mark,.body{transition:none}}
+@media (max-width:759px){.callout{padding:5px 6px 4px;max-width:calc(100% - 132px)}.callout .h{font-size:9.5px;margin:0 0 3px}.callout ul{flex-wrap:nowrap;overflow-x:auto;gap:6px;max-width:none;scrollbar-width:none;padding-bottom:2px}.callout ul::-webkit-scrollbar{display:none}.callout li{flex:0 0 40px;width:40px}.callout .th,.callout img{width:32px;height:32px;box-sizing:border-box}.callout .q{font-size:9px;padding:0 3px}.callout .nm{font-size:9px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:40px}
+  .callout.more::after{content:"";position:absolute;right:1px;top:1px;bottom:1px;width:28px;background:linear-gradient(to right,rgba(244,244,244,0),var(--callout));pointer-events:none}}
+@media (min-width:760px){.sheet{max-height:34%}.callout ul{max-width:420px}.bubble{width:150px;height:150px}}
+</style>
+<div class="app">
+  <header>
+    <div><h1 id="h1"></h1><span class="sub" id="sub"></span></div>
+    <span class="where" id="where"></span>
+  </header>
+  <div class="stage">
+    <canvas id="c"></canvas>
+    <div id="dims"></div>
+    <div class="callout" id="callout" hidden><p class="h">Piezas de este paso · toca una para ubicarla</p><ul id="parts"></ul></div>
+    <div class="plan"><span>Planta</span></div>
+    <div class="bubble" id="bubble"><i></i></div><div class="leader" id="leader"></div><div class="ring" id="ring"></div>
+    <div class="scale"><i id="scaleBar"></i><span id="scaleTxt">1 m</span></div>
+    <button class="replay" id="replay" type="button">Repetir</button>
+  </div>
+  <div class="progress"><i id="bar"></i><div class="ticks" id="ticks"></div></div>
+  <div class="sheet" id="sheet">
+    <div class="num" id="num"></div>
+    <div class="body" id="body">
+      <h2 class="title" id="title"></h2>
+      <p class="text" id="text"></p>
+      <ol class="acts" id="acts"></ol>
+      <div class="meta" id="meta"></div>
+      <p class="tip" id="tip"></p>
+      <div id="extra"></div>
+    </div>
+  </div>
+  <div class="nav">
+    <button id="prev" type="button">Atrás</button>
+    <button id="next" type="button" class="primary">Siguiente</button>
+  </div>
+</div>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+<script>
+/* ======================================================================
+   CONFIG: everything project-specific that is data lives here.
+   Scene geometry, part builders (P) and reg() calls live in the
+   PROJECT SCENE block further down (they need the helpers). Units: meters (CONFIG.units).
+   ====================================================================== */
+/* CASA: the house as data, ported 1:1 from casa_3d/index.html (v1), whose coordinates were measured from the
+   architect's plans (PK 17-07-2026, plantas esc. 1/50). Every row is the argument list of one v1 call, so any
+   number here can be checked against v1. Meters: x = right on the plan, z = down the plan (toward the hill;
+   the lake is at -z), y up. Zócalo floor top y=0.05, first floor y=3.0, walls 2.70 m.
+   The numbers on the pages (m², m, counts) are computed from these rows, not typed. */
+var CASA = (function(){
+  var LV_Z = 0.05, LV_F = 3.0, H = 2.7;
+
+  /* terrainH(x,z), verbatim from v1: flat lower zone y=0, plateau y=3 behind the house and at the west parking,
+     slope down toward the lake in front (the slope and the plateau shape are v1 estimates, not survey data) */
+  function noise(x, z){ return Math.sin(x * 0.13 + 1.3) * Math.cos(z * 0.11) * 1.1 + Math.sin(x * 0.37 + z * 0.21) * 0.35 + Math.cos(x * 0.05 - z * 0.07) * 1.5; }
+  function onPlateau(x, z){
+    if (z >= 12.25){ if (x >= -2.0 - 1e-6 && x <= 4.0 + 1e-6 && z <= 13.5 + 1e-6) return false; return true; }   /* hueco del patio inglés */
+    if (x <= -11.25 && z >= 0.25) return true;
+    if (x <= -9.75 && z >= 6.75) return true;
+    return false; }
+  function terrainH(x, z){ var y;
+    if (z >= 18.5) y = 3 + (z - 18.5) * 0.38; else if (onPlateau(x, z)) y = 3; else if (z > -4) y = 0; else y = (z + 4) * 0.3;
+    var w = 0; if (z < -7) w = Math.min(1, (-7 - z) / 12); if (z > 19) w = Math.min(1, (z - 19) / 10);
+    var dx = x < -26 ? -26 - x : x > 34 ? x - 34 : 0; w = Math.max(w, Math.min(1, dx / 15));
+    y += noise(x, z) * w; if (z < -34) y = Math.min(y, -9.5 - (-34 - z) * 0.2); return y; }
+
+  var SITE = {x0: -22, x1: 27, z0: -10, z1: 20, base: -3.2};   /* the trimmed patch of hillside the manual draws */
+
+  /* retaining(x0,x1,z0,z1), 0 → 3 m. The two long runs are trimmed to the patch (v1 runs them to x=-45 and x=32). */
+  var RET = {
+    fondo: [[-10.0, -2.5, 12.0, 12.5], [4.5, 11.2, 11.36, 12.5], [11.2, 19.4, 12.0, 12.5], [19.07, 19.4, 9.1, 12.0], [19.4, SITE.x1, 12.0, 12.5]],
+    patio: [[-2.5, -1.96, 11.36, 14.0], [3.77, 4.5, 11.36, 14.0], [-2.5, 4.5, 13.58, 14.0]],
+    oeste: [[-10.0, -9.5, 6.4, 12.5], [-11.5, -11.0, 0, 7.0], [SITE.x0, -11.0, 0, 0.5], [-11.0, -10.0, 6.4, 7.0]]
+  };
+  var RADIER = [-9.57, 22.3, -0.14, 12.13];     /* box(-9.57,22.3,-0.05,LV_Z,-0.14,12.13) */
+  var PATIO = [-1.96, 3.77, 11.36, 13.58];      /* piso del patio inglés, 0 → LV_Z */
+
+  /* wall(x1,z1,x2,z2,{out,win:[[a0,a1,sill,head]],h}) on the zócalo (base 0.05), grouped by v1's room clusters */
+  var ZW = {
+    frente: [[12.92, 3.6, 14.84, 3.6, {out: 'n', win: [[13.2, 14.5, 1.6, 2.3]]}], [20.36, 3.6, 22.3, 3.6, {out: 'n'}],
+             [-0.02, -0.14, -0.02, 1.5, {out: 'w'}], [7.4, -0.14, 7.4, 1.5, {out: 'e'}]],
+    dormitorios: [[-7.42, 3.6, -7.42, 7.98, {out: 'w', win: [[4.4, 6.6, 0.9, 2.2]]}], [-3.7, 3.6, -3.7, 7.98], [0.02, 3.6, 0.02, 7.98], [7.37, 3.6, 7.37, 7.98],
+             [-7.42, 7.92, -4.6, 7.92], [-3.7, 7.92, -1.0, 7.92], [0.02, 7.92, 5.7, 7.92, {win: [[1.16, 2.36, 0.9, 2.2], [3.42, 4.62, 0.9, 2.2]]}], [7.37, 7.92, 11.99, 7.92]],
+    bano3: [[12.92, 3.6, 12.92, 6.18], [12.92, 7.08, 12.92, 7.98], [13.6, 6.18, 14.84, 6.18], [14.84, 3.6, 14.84, 7.98], [12.92, 7.92, 14.84, 7.92]],
+    este: [[20.36, 3.6, 20.36, 7.98], [22.3, 3.6, 22.3, 7.98, {out: 'e'}], [20.36, 7.98, 22.3, 7.98, {out: 's'}]],
+    servicio: [[-6.58, 9.22, -6.58, 10.2], [-6.58, 11.0, -6.58, 12.04], [-5.64, 9.22, -4.01, 9.22], [-4.01, 9.22, -4.01, 12.04], [-4.01, 9.22, -2.82, 9.22],
+             [-2.0, 9.22, -2.0, 11.36], [-2.0, 9.22, 0.09, 9.22], [0.8, 9.22, 5.65, 9.22],
+             [-1.96, 11.36, 3.77, 11.36, {out: 's', win: [[-1.5, 3.4, 0.9, 2.3]]}], [5.65, 9.22, 5.65, 11.36]],
+    escalera: [[7.4, 9.05, 7.4, 11.34], [8.6, 9.05, 11.16, 9.05], [11.16, 9.05, 11.16, 12.13]],
+    bodegas: [[12.23, 9.1, 14.88, 9.1], [14.88, 10.0, 14.88, 12.13], [14.88, 9.1, 17.44, 9.1, {out: 'n'}]]
+  };
+  /* v1's ghost walls: futuro baño 5 / dormitorio 6 and the possible dormitorio de servicio */
+  var ZFUT = [[16.66, 3.6, 16.66, 6.3], [14.84, 6.3, 16.66, 6.3], [14.84, 7.98, 20.36, 7.98], [0.09, 9.22, 0.09, 11.36]];
+  var ZFUT_GLASS = [[14.84, 3.6, 20.36, 3.6]];
+  var ZFUT_BED = [18.3, 20.3, LV_Z, LV_Z + 0.55, 4.84, 6.64];
+  /* glass(x1,z1,x2,z2): the zócalo's sliding glazing to the lake */
+  var ZG = [[-7.42, 3.6, -3.7, 3.6], [-3.7, 3.6, 0.02, 3.6], [0.02, 3.6, 7.37, 3.6], [7.37, 3.6, 12.92, 3.6]];
+
+  /* first floor (base 3.0) */
+  var FW = {
+    centro: [[0, -0.2, 0, 1.5, {out: 'w'}], [0, 7.8, 0, 10.32, {out: 'w'}], [0, 11.28, 0, 12.06, {out: 'w'}], [7.4, -0.2, 7.4, 3.56, {out: 'e'}], [7.4, 3.56, 7.4, 7.92],
+             [0, 12.06, 5.64, 12.06, {out: 's', win: [[1.8, 4.26, 0.95, 2.2]]}], [5.64, 7.8, 5.64, 12.06], [8.4, 9.0, 11.16, 9.0], [11.16, 9.0, 11.16, 12.06]],
+    ala: [[12.9, 3.56, 14.82, 3.56, {out: 'n', win: [[13.2, 14.5, 1.6, 2.3]]}], [22.2, 3.56, 22.2, 7.8, {out: 'e', win: [[4.2, 7.2, 0.5, 2.4]]}], [7.4, 7.2, 11.9, 7.2],
+          [12.9, 3.56, 12.9, 6.18], [12.9, 7.02, 12.9, 7.86], [13.9, 6.18, 14.82, 6.18], [14.82, 3.56, 14.82, 7.86], [12.9, 7.86, 14.82, 7.86]],
+    alaFondo: [[16.92, 7.8, 19.5, 7.8], [19.5, 7.8, 22.2, 7.8, {out: 's'}], [15.8, 7.8, 15.8, 9.2], [12.9, 9.2, 14.5, 9.2], [15.4, 9.2, 15.8, 9.2], [17.8, 9.2, 19.5, 9.2],
+          [16.92, 9.2, 16.92, 10.14], [15.48, 10.14, 16.92, 10.14], [15.48, 9.2, 15.48, 12.06], [12.06, 9.2, 12.06, 10.38], [12.06, 10.38, 12.9, 10.38], [12.9, 9.2, 12.9, 12.06],
+          [11.16, 12.06, 19.5, 12.06, {out: 's', win: [[11.5, 12.6, 1.5, 2.2], [13.3, 15.0, 1.5, 2.2], [15.7, 16.7, 1.5, 2.2], [17.3, 19.1, 1.5, 2.2]]}],
+          [19.5, 7.8, 19.5, 12.06, {out: 'e', win: [[8.0, 9.0, 0.9, 2.2], [10.3, 11.7, 1.5, 2.2]]}]],
+    quincho: [[-7.38, 3.48, -7.38, 6.36, {out: 'w'}], [-9.6, 7.8, -9.6, 12.0, {h: 1.8, out: 'w'}], [-9.6, 7.8, -6.66, 7.8, {h: 1.8}], [-9.6, 12.0, -6.66, 12.0, {h: 1.8, out: 's'}],
+          [-6.66, 7.8, -6.66, 10.26], [-6.66, 12.0, -1.08, 12.0, {out: 's'}]]
+  };
+  var FG = {
+    centro: [[0, 1.5, 0, 7.8], [0, 0, 7.4, 0], [5.64, 11.34, 7.4, 11.34], [7.4, 11.34, 11.16, 11.34]],   /* ventanales del living + puerta de entrada + vidrio de la escalera */
+    ala: [[7.4, 3.56, 12.9, 3.56], [14.82, 3.56, 22.2, 3.56]]
+  };
+  /* rail(x1,z1,x2,z2,LV_F): terrazas, vacío del patio inglés, escalera, quincho */
+  var RAILS = [[-1.9, -1.7, 9.3, -1.7], [-1.9, -1.7, -1.9, 1.5], [-8.7, 1.5, -1.9, 1.5], [-8.7, 1.5, -8.7, 3.56], [-8.7, 3.56, -7.38, 3.56],
+    [9.3, -1.7, 9.3, 1.52], [9.3, 1.52, 22.28, 1.52], [22.28, 1.52, 22.28, 3.56],
+    [-2.23, 12.06, -2.23, 13.8], [4.13, 12.06, 4.13, 13.8], [-2.23, 13.8, 4.13, 13.8],
+    [8.4, 9.0, 8.4, 10.17], [-7.38, 6.36, -7.38, 7.8], [-1.08, 12.06, 0, 12.06]];
+  /* slab(x0,x1,z0,z1): 2.75 → 3.0. LOSA = interior floors (oak in v1, quincho included); DECK = terrazas (deck boards in v1) */
+  var LOSA = [[0, 7.4, 0, 12.06], [-7.38, 0, 3.56, 7.8], [-6.66, 0, 7.8, 12.06], [7.4, 22.2, 3.56, 7.86], [7.4, 8.4, 7.86, 11.34], [8.4, 11.16, 7.86, 9.0], [11.16, 19.5, 7.86, 12.06]];
+  var DECK = [[-9.6, -6.66, 7.8, 12.0], [-1.9, 9.3, -1.7, 0], [-1.9, 0, 0, 1.5], [-8.7, 0, 1.5, 3.56], [7.4, 9.3, 0, 1.52], [7.4, 22.28, 1.52, 3.56]];
+  /* post(x,z,y0,y1), 0.18 × 0.18 */
+  var POSTS = {
+    terraza: [[-1.9, -1.7, 0, LV_F], [1.86, -1.7, 0, LV_F], [5.56, -1.7, 0, LV_F], [9.3, -1.7, 0, LV_F]],
+    alto: [[-8.7, 1.5, 0, 5.84], [-5.8, 1.5, 0, 5.84], [-2.9, 1.5, 0, 5.84], [9.3, 1.52, 0, 5.84], [12.6, 1.52, 0, 5.84], [15.9, 1.52, 0, 5.84], [19.2, 1.52, 0, 5.84], [22.28, 1.52, 0, 5.84]],
+    zocalo: [[0, -0.1, LV_Z, 2.75], [1.88, -0.1, LV_Z, 2.75], [5.58, -0.1, LV_Z, 2.75], [7.4, -0.1, LV_Z, 2.75]],
+    pergola: [[-9.4, 7.92, LV_Z, 2.75], [-8.9, 7.92, LV_Z, 2.75], [-8.4, 7.92, LV_Z, 2.75], [-7.9, 7.92, LV_Z, 2.75]],   /* v1: box(x±.08, 7.84→8.0) */
+    alero: [[-0.3, -1.75, LV_F, 5.5], [7.7, -1.75, LV_F, 5.5]]
+  };
+  /* box(x0,x1,y0,y1,z0,z1): chimeneas (hogar on the first floor, cañón above the roof) */
+  var CHIM = {
+    hogar: [[6.66, 7.3, LV_F, 5.7, 3.1, 4.75], [6.63, 6.67, LV_F + 0.35, LV_F + 1.1, 3.5, 4.35], [-7.38, -6.52, LV_F, 5.7, 4.32, 6.18], [-6.53, -6.5, LV_F + 0.3, LV_F + 1.1, 4.8, 5.7]],
+    canon: [[6.8, 7.3, 5.7, 9.5, 3.6, 4.3], [-7.3, -6.6, 5.7, 8.8, 4.9, 5.6]]
+  };
+  /* gable(x0,x1,z0,z1,eave,deg,axis): three roofs; the central one taller and steeper */
+  var ROOF = {centro: [-0.45, 7.85, -1.9, 12.5, 5.385, 35, 'z'], ala: [7.4, 22.7, 1.2, 12.5, 5.72, 22, 'x'], quincho: [-7.8, 0, 1.2, 12.5, 5.72, 22, 'x']};
+  var ROOF_BANDS = [[7.4, 22.2, 5.7, 6.66, 3.53, 3.6], [7.4, 19.5, 5.7, 5.88, 12.02, 12.1]];   /* v1's woodDark infill between wall tops and roof */
+
+  /* furniture: v1's blocks (v1 invented them: reference only, not from the plans) */
+  var FURN = {
+    zc: {b: LV_Z,
+      bed: [[-7.27, -5.28, 4.44, 6.44, 'w'], [-3.58, -1.6, 4.3, 5.28, 'w'], [-3.58, -1.6, 5.68, 6.68, 'w'], [8.7, 10.5, 5.22, 7.22, 's']],
+      sofa: [[0.32, 1.22, 4.1, 7.5, 'w'], [1.22, 2.93, 4.1, 5.0, 'n'], [2.04, 2.84, 0.32, 2.9, 'w'], [4.64, 5.46, 0.32, 2.9, 'e']],
+      table: [[1.8, 2.58, 5.74, 6.92, 0.4], [3.2, 4.3, 1.2, 1.9, 0.4]],
+      cabinet: [[-7.3, -4.8, 7.25, 7.82, 2.3], [-3.6, -1.1, 7.25, 7.82, 2.3], [6.8, 7.25, 5.0, 6.8, 0.5], [7.46, 11.9, 7.25, 7.82, 2.3], [14.3, 14.75, 6.4, 7.8, 2.1], [11.4, 14.6, 11.6, 11.98, 2.0]],
+      fixture: [[14.3, 14.72, 4.0, 4.9, 0.85], [14.3, 14.72, 5.3, 5.75, 0.42], [-6.4, -5.2, 11.4, 11.98, 0.9], [-5.0, -4.4, 11.4, 11.98, 0.9], [-3.9, -3.45, 11.3, 11.75, 0.42], [-2.55, -2.12, 9.6, 10.4, 0.85]],
+      rug: [[0.6, 4.6, 4.4, 7.3]],
+      boxes: [[7.15, 7.2, LV_Z + 0.9, LV_Z + 1.6, 5.3, 6.5]]   /* tele */
+    },
+    ff: {b: LV_F,
+      bed: [[9.0, 10.74, 5.18, 7.14, 's'], [18.5, 20.35, 5.8, 7.72, 's']],
+      sofa: [[-1.86, -0.98, 3.66, 6.24, 'e'], [-5.06, -2.46, 6.42, 7.3, 's'], [1.2, 2.1, 0.82, 3.42, 'w'], [2.1, 4.56, 2.52, 3.42, 's'], [15.0, 15.8, 4.3, 6.1, 'w']],
+      table: [[-4.68, -3.0, 4.78, 5.74, 0.4], [-5.28, -2.1, 8.7, 9.9], [2.8, 3.98, 1.15, 1.92, 0.38], [1.56, 4.14, 4.44, 5.62], [16.2, 16.8, 4.9, 5.5, 0.4]],
+      cabinet: [[7.5, 11.9, 7.25, 7.6, 2.2], [0.12, 0.8, 7.9, 10.3, 2.3], [8.4, 8.9, 6.65, 7.12, 0.5], [10.84, 11.34, 6.65, 7.12, 0.5], [17.9, 18.4, 7.2, 7.7, 0.5],
+                [20.45, 20.95, 7.2, 7.7, 0.5], [14.3, 14.72, 6.35, 7.76, 2.2], [13.0, 13.45, 9.4, 11.9, 2.2], [15.0, 15.38, 10.3, 11.9, 2.2], [12.15, 12.8, 9.3, 10.3, 2.2]],
+      fixture: [[14.25, 14.72, 3.8, 4.9, 0.85], [14.3, 14.72, 5.3, 5.75, 0.42], [17.2, 19.4, 11.2, 11.96, 0.55], [18.95, 19.42, 9.4, 10.8, 0.85], [15.6, 16.0, 11.45, 11.9, 0.42],
+                [11.3, 11.7, 11.45, 11.9, 0.42], [12.4, 12.82, 10.55, 11.1, 0.85]],
+      rug: [[1.0, 4.8, 0.7, 3.7], [17.6, 21.2, 5.0, 7.7]],
+      boxes: [[2.3, 3.4, LV_F + 2.1, LV_F + 2.15, 4.95, 5.1], [2.83, 2.87, LV_F + 2.15, 7.0, 5.0, 5.04]],   /* lámpara del comedor */
+      /* cocina: mueble lateral, mueble del fondo, isla (cada uno con su cubierta) y 4 pisos */
+      kitchen: [[4.98, 5.54, LV_F, LV_F + 0.9, 7.9, 11.25], [4.95, 5.54, LV_F + 0.9, LV_F + 0.94, 7.9, 11.25], [1.6, 4.5, LV_F, LV_F + 0.9, 11.4, 11.96], [1.6, 4.5, LV_F + 0.9, LV_F + 0.94, 11.35, 11.96],
+                [1.92, 3.64, LV_F, LV_F + 0.9, 8.54, 9.54], [1.87, 3.69, LV_F + 0.9, LV_F + 0.95, 8.49, 9.59]],
+      stools: [[2.35, 8.2], [3.2, 8.2], [2.35, 9.9], [3.2, 9.9]],
+      /* quincho: mesón de la parrilla, cubierta, parrilla, campana y ducto */
+      grill: [[-6.6, -1.1, LV_F, LV_F + 0.9, 11.35, 11.95], [-6.6, -1.1, LV_F + 0.9, LV_F + 0.95, 11.3, 11.95], [-4.58, -2.82, LV_F + 0.95, LV_F + 1.0, 11.4, 11.9],
+              [-4.7, -2.7, LV_F + 1.9, LV_F + 2.6, 11.25, 11.95], [-3.95, -3.45, LV_F + 2.6, 6.4, 11.5, 11.9]],
+      chairs: (function(){ var c = []; [-4.9, -4.28, -3.66, -3.04, -2.42].forEach(function(x){ c.push([x, 8.35], [x, 10.25]); }); c.push([-5.65, 9.3], [-1.75, 9.3]);
+        [1.9, 2.5, 3.1, 3.7].forEach(function(x){ c.push([x, 4.05], [x, 6.0]); }); c.push([1.15, 5.03], [4.55, 5.03]); return c; })()
+    }
+  };
+
+  /* landscaping (step 11). Trees: the tree symbols on the architect's first-floor plan (read off the image, aprox.);
+     rocks, lawn and the stone path are suggestions (the path follows v1's stepping stones toward the lake). */
+  var TREES = [[-16, 16.9, 1.7], [-9.0, 17.2, 1.5], [0, 17.0, 1.9], [11.4, 17.0, 1.6], [19.5, 16.8, 1.8], [24.1, 6.5, 1.5], [23.9, 9.3, 1.3], [23.4, 11.4, 1.6], [-10.9, 10.0, 1.4]];
+  var ROCKS = [[-8.5, -5.6, 0.9], [11.5, -6.4, 0.75], [17.8, -5.2, 1.05], [2.5, -7.8, 0.65]];
+  var LAWN = [[-11.0, SITE.x1, -4.0, -0.2], [22.4, SITE.x1, -0.2, 11.9]];
+  var PATH = [-6.0, -4.8, -4.0, -0.14];
+  var STONES = []; for (var zs = -4.6; zs > SITE.z0 + 0.5; zs -= 0.9) STONES.push(zs);   /* v1: box(-6.0,-4.8,y-0.3,y+0.1,z-0.4,z+0.3), y = terrainH(-5.4,z) */
+
+  /* ---- v1's wall()/glass()/rail() as pure functions: boxes [x0,x1,y0,y1,z0,z1] ---- */
+  function line(p){ var horiz = Math.abs(p[1] - p[3]) < 1e-6;
+    return {horiz: horiz, c: horiz ? p[1] : p[0], a0: horiz ? Math.min(p[0], p[2]) : Math.min(p[1], p[3]), a1: horiz ? Math.max(p[0], p[2]) : Math.max(p[1], p[3])}; }
+  function along(L, a0, a1, y0, y1, d0, d1){ return L.horiz ? [a0, a1, y0, y1, L.c + d0, L.c + d1] : [L.c + d0, L.c + d1, y0, y1, a0, a1]; }
+  function pane(L, a0, a1, y0, y1, frames){ var out = {glass: [along(L, a0, a1, y0, y1, -0.015, 0.015)], frame: []};
+    if (frames){ var fr = function(p0, p1, q0, q1){ out.frame.push(along(L, p0, p1, q0, q1, -0.035, 0.035)); };
+      fr(a0, a1, y0, y0 + 0.05); fr(a0, a1, y1 - 0.05, y1); var n = Math.max(1, Math.round((a1 - a0) / 1.4));
+      for (var i = 0; i <= n; i++){ var a = a0 + (a1 - a0) * i / n; fr(a - 0.025, a + 0.025, y0, y1); } }
+    return out; }
+  function wall(p, base){ var o = p[4] || {}, L = line(p), h = o.h || H, t = 0.2, res = {solid: [], clad: [], glass: [], frame: [], out: o.out, len: L.a1 - L.a0, win: (o.win || []).length};
+    var pieces = [], cur = L.a0;
+    (o.win || []).slice().sort(function(a, b){ return a[0] - b[0]; }).forEach(function(w){
+      if (w[0] > cur) pieces.push([cur, w[0], 0, h]); pieces.push([w[0], w[1], 0, w[2]]); pieces.push([w[0], w[1], w[3], h]);
+      var pn = pane(L, w[0], w[1], base + w[2], base + w[3], true); res.glass = res.glass.concat(pn.glass); res.frame = res.frame.concat(pn.frame); cur = w[1]; });
+    if (cur < L.a1) pieces.push([cur, L.a1, 0, h]);
+    pieces.forEach(function(pc){ if (pc[3] - pc[2] < 0.01) return; res.solid.push(along(L, pc[0], pc[1], base + pc[2], base + pc[3], -t / 2, t / 2));
+      if (o.out){ var e0 = pc[0] === L.a0 ? 0.12 : 0, e1 = pc[1] === L.a1 ? 0.12 : 0, off = t / 2 + 0.025, sg = (o.out === 'n' || o.out === 'w') ? -1 : 1;
+        res.clad.push(along(L, pc[0] - e0, pc[1] + e1, base + pc[2], base + pc[3], sg * off - 0.025, sg * off + 0.025)); } });
+    return res; }
+  function glass(p, base, frames){ var L = line(p); return pane(L, L.a0, L.a1, base, base + H, frames); }
+  function rail(p, base){ var L = line(p); return {glass: pane(L, L.a0, L.a1, base + 0.05, base + 1.0, false).glass, solid: [along(L, L.a0, L.a1, base + 1.0, base + 1.05, -0.03, 0.03)], len: L.a1 - L.a0}; }
+  function gable(r){ /* v1's gable(): returns rise, the half-span, the slope length and the run along the ridge */
+    var p = r[5] * Math.PI / 180, half = r[6] === 'x' ? (r[3] - r[2]) / 2 : (r[1] - r[0]) / 2;
+    return {p: p, half: half, rise: half * Math.tan(p), L: half / Math.cos(p) + 0.08, run: r[6] === 'x' ? r[1] - r[0] : r[3] - r[2]}; }
+
+  /* ---- numbers for the pages ---- */
+  function all(o){ return Object.keys(o).reduce(function(a, k){ return a.concat(o[k]); }, []); }
+  function sum(list, f){ return list.reduce(function(s, x){ return s + f(x); }, 0); }
+  function area(r){ return (r[1] - r[0]) * (r[3] - r[2]); }
+  function segLen(p){ return Math.hypot(p[2] - p[0], p[3] - p[1]); }
+  var zw = all(ZW).map(function(p){ return wall(p, LV_Z); }), fw = all(FW).map(function(p){ return wall(p, LV_F); });
+  var cladArea = sum(zw.concat(fw), function(w){ return sum(w.clad, function(b){ return Math.max(b[1] - b[0], b[5] - b[4]) * (b[3] - b[2]); }); });
+  var st = {
+    retLen: sum(all(RET), function(r){ return Math.max(r[1] - r[0], r[3] - r[2]); }),
+    radier: area(RADIER), patio: area(PATIO),
+    dados: POSTS.terraza.length + POSTS.alto.length + POSTS.zocalo.length + POSTS.pergola.length,
+    zLen: sum(zw, function(w){ return w.len; }), zVentanal: ZG.length, zVentana: sum(zw, function(w){ return w.win; }), zGlassLen: sum(ZG, segLen),
+    fLen: sum(fw, function(w){ return w.len; }), fVentanal: all(FG).length, fVentana: sum(fw, function(w){ return w.win; }),
+    losa: sum(LOSA, area), deck: sum(DECK, area), railLen: sum(RAILS, segLen),
+    postes: POSTS.terraza.length + POSTS.alto.length + POSTS.zocalo.length + POSTS.pergola.length,
+    roof: sum(Object.keys(ROOF).map(function(k){ return ROOF[k]; }), function(r){ var g = gable(r); return 2 * g.L * g.run; }),
+    ridgeC: ROOF.centro[4] + gable(ROOF.centro).rise, ridgeA: ROOF.ala[4] + gable(ROOF.ala).rise,
+    clad: cladArea,
+    sofas: FURN.zc.sofa.length + FURN.ff.sofa.length, camas: FURN.zc.bed.length + FURN.ff.bed.length, mesas: FURN.zc.table.length + FURN.ff.table.length,
+    sillas: FURN.ff.chairs.length, muebles: FURN.zc.cabinet.length + FURN.ff.cabinet.length, sanitarios: FURN.zc.fixture.length + FURN.ff.fixture.length,
+    lawn: sum(LAWN, area), trees: TREES.length, rocks: ROCKS.length, stones: STONES.length
+  };
+  st.ventanas = st.zVentanal + st.zVentana + st.fVentanal + st.fVentana;
+  return {LV_Z: LV_Z, LV_F: LV_F, H: H, terrainH: terrainH, SITE: SITE, RET: RET, RADIER: RADIER, PATIO: PATIO, ZW: ZW, ZFUT: ZFUT, ZFUT_GLASS: ZFUT_GLASS, ZFUT_BED: ZFUT_BED, ZG: ZG,
+    FW: FW, FG: FG, RAILS: RAILS, LOSA: LOSA, DECK: DECK, POSTS: POSTS, CHIM: CHIM, ROOF: ROOF, ROOF_BANDS: ROOF_BANDS, FURN: FURN,
+    TREES: TREES, ROCKS: ROCKS, LAWN: LAWN, PATH: PATH, STONES: STONES, wall: wall, glass: glass, rail: rail, gable: gable, line: line, along: along, stats: st};
+})();
+/* numbers on the page: Chilean format, decimal comma */
+function nf(n, d){ return n.toFixed(d || 0).replace('.', ','); }
+function nu(n, unit, d){ return nf(n, d) + '\u00a0' + unit; }   /* number + unit that never wraps (the part badges are narrow on a phone) */
+var S = CASA.stats, V_FRONT = [-0.55, 0.85, -1];
+
+var CONFIG = {
+  title: 'Casa en la ladera',
+  subtitle: 'Cómo se construye, paso a paso',
+  date: '27-09-2026',                   /* shown top right: "27-09-2026 · 2 de 11" */
+  storageKey: 'casa-ladera-obra',       /* localStorage key for the last page; unique per manual */
+  accent: 0xf28c1e,                     /* dark: arrows, plan frame, outline flash, CSS --accent */
+  fill: 0xf8c692,                       /* pale orange: this step's parts and thumbnails (ink edges stay visible) */
+  view: V_FRONT,                        /* default view: from the lake side, west, from above */
+  units: {cm: 100, glyph: 2.5,          /* meters: cm per unit (Modulor figure), size of arrows, ticks and dots */
+          bar: [[20, '20 m'], [10, '10 m'], [5, '5 m'], [2, '2 m'], [1, '1 m'], [0.5, '50 cm'], [0.2, '20 cm'], [0.1, '10 cm']]},
+  plan: {c: [3.5, 5.5], r: 17},         /* plan inset: the house and its retaining walls */
+  figure: [-4.6, -2.6],                 /* Modulor scale figure on the flat lawn in front of the house */
+  CAM: {                                /* presets: c centre, r half-height (m); optional v (view), walls ({h, sides}), cut ([keys]) */
+    sitio:    {c: [2.5, 0.5, 4.5], r: 19},
+    corte:    {c: [4, 1.2, 7.5], r: 20, v: [-0.35, 1.15, -1]},
+    radier:   {c: [6, 0, 5.5], r: 17, v: [-0.5, 1.05, -1]},
+    zocalo:   {c: [5.6, 1.2, 6.5], r: 17},
+    losa:     {c: [5.6, 2.2, 5.5], r: 17},
+    piso1:    {c: [5.6, 3.8, 6.5], r: 17},
+    terrazas: {c: [5, 2.6, 5], r: 17},
+    techo:    {c: [5.6, 4.6, 6], r: 17.5},
+    revest:   {c: [6.5, 3.6, 6], r: 17, v: [0.8, 0.75, -1]},
+    interior: {c: [6, 3, 7], r: 15.5, v: [-0.35, 1.5, -0.8]},
+    jardin:   {c: [3, 1.5, 4.5], r: 20},
+    final:    {c: [4, 2.8, 4.5], r: 18.5}
+  },
+  NAMES: {
+    corte: 'Tierra a sacar', contencion: 'Muro de contención', radier: 'Radier', dado: 'Dado de fundación',
+    muroZ: 'Muro del zócalo', ventanal: 'Ventanal', ventana: 'Ventana', futuro: 'Para después',
+    pilar: 'Pilar', viga: 'Vigas de terraza', losa: 'Losa', muro1: 'Muro del primer piso', chimenea: 'Chimenea',
+    tabla: 'Piso de terraza', baranda: 'Baranda de vidrio', escInt: 'Escalera interior', escExt: 'Escalera exterior',
+    techo: 'Techo', fronton: 'Frontón', canon: 'Cañón de chimenea', revest: 'Revestimiento', marco: 'Marco de ventana',
+    sofa: 'Sofá', cama: 'Cama', mesa: 'Mesa', silla: 'Silla', mueble: 'Mueble', sanitario: 'Artefacto de baño', cocina: 'Isla de cocina',
+    pasto: 'Pasto', camino: 'Piedra de camino', arbol: 'Árbol', roca: 'Roca'
+  },
+  INVENTORY: [
+    ['Terreno y fundaciones', [['contencion', nu(S.retLen, 'm')], ['radier', nu(S.radier, 'm²')], ['dado', String(S.dados)]]],
+    ['Zócalo', [['muroZ', nu(S.zLen, 'm')], ['ventanal', String(S.zVentanal)], ['ventana', String(S.zVentana)], ['futuro', 'después']]],
+    ['Primer piso', [['pilar', String(S.postes + 2)], ['viga', nu(S.deck, 'm²')], ['losa', nu(S.losa, 'm²')], ['muro1', nu(S.fLen, 'm')],
+                     ['ventanal', String(S.fVentanal)], ['ventana', String(S.fVentana)], ['chimenea', '2']]],
+    ['Terrazas y techo', [['tabla', nu(S.deck, 'm²')], ['baranda', nu(S.railLen, 'm')], ['escInt', '1'], ['escExt', '1'], ['techo', nu(S.roof, 'm²')], ['fronton', '6'], ['canon', '2']]],
+    ['Terminaciones', [['revest', nu(S.clad, 'm²')], ['marco', String(S.ventanas)]]],
+    ['Interior (referencia)', [['sofa', String(S.sofas)], ['cama', String(S.camas)], ['mesa', String(S.mesas)], ['silla', String(S.sillas)],
+                     ['mueble', String(S.muebles)], ['sanitario', String(S.sanitarios)], ['cocina', '1']]],
+    ['Jardín', [['pasto', nu(S.lawn, 'm²')], ['camino', String(S.stones)], ['arbol', String(S.trees)], ['roca', String(S.rocks)]]]
+  ],
+  /* step keys: title, cam, text, acts [[text, [x,y,z] | null, [dx,dy]]], meta, time, tip, parts [[partKey, qty]],
+     dims [{a, b, off, label}], notes [{p, text}], detail {p, r, hide:[objKeys], view:[x,y,z]}, inventory, calendar [[date, text]],
+     view [x,y,z], walls {h, sides}, cut [objKeys], onEnter(t) -> optional new end time (ms) */
+  STEPS: [
+    {title: 'La casa completa', cam: 'final', inventory: true, time: '11 pasos',
+     text: 'Una casa de dos pisos apoyada en la ladera: abajo el zócalo, que mira al lago; arriba el primer piso, con living, cocina, quincho y terrazas. Abajo están todas las piezas, en el orden en que se usan.',
+     tip: 'Arrastra el dibujo para girarlo. Las medidas vienen de los planos del arquitecto; lo que dice «aprox.» es estimado.'},
+
+    {title: 'El terreno', cam: 'sitio',
+     text: 'La casa se apoya en un cerro que baja hacia el lago. Hay dos zonas planas: abajo, donde va el zócalo, y arriba, 3 m más alta, para estacionar y entrar.',
+     acts: [['La pendiente baja hacia el lago, adelante en el dibujo.', [9, -1.6, -8.5], [0, 0]],
+            ['Zona plana de abajo: aquí va el zócalo.', [7, 0, 5], [0, 0]],
+            ['Plataforma alta, 3 m más arriba: estacionamiento y entrada.', [-13.5, 3, 5], [0, 0]],
+            ['Quiebre de pendiente: donde lo plano empieza a bajar.', [12, 0, -4], [0, 0]]],
+     meta: 'Desnivel 3,0 m · zona plana ≈ 16 m de fondo · pendiente ≈ 30 % (aprox.)',
+     dims: [{a: [16, 0, 9.25], b: [16, 3, 9.25], off: [0, 0, -1.2], label: '3,0 m'}],
+     notes: [{p: [2, -2.2, -10], text: 'hacia el lago'}],
+     tip: 'Antes de excavar se marcan en el terreno las esquinas de la casa, con estacas y lienza.'},
+
+    {title: 'Excavación y muros de contención', cam: 'corte', parts: [['corte', 'aprox.'], ['contencion', nu(S.retLen, 'm')]],
+     text: 'Se corta el cerro para dejar plano el sector del zócalo. Donde queda un desnivel de 3 m, un muro de contención sujeta la tierra.',
+     acts: [['Saca la tierra del talud y del patio inglés.', [9, 1.2, 10.5], [0, 0]],
+            ['Muro de fondo: detrás del lavado, el baño 4 y las bodegas.', [15, 3, 12.25], [0, -16]],
+            ['Patio inglés: tres muros alrededor de un patio hundido.', [1, 3, 13.8], [0, -18]],
+            ['Borde oeste: el muro del estacionamiento y el de la escalera.', [-11.25, 3, 3.5], [-16, -10]]],
+     meta: nf(S.retLen) + ' m de muro a la vista · 3,0 m de alto · ' + nf(S.retLen * 3) + ' m² de cara',
+     tip: 'Detrás de cada muro va un dren con grava: si el agua no sale, empuja el muro.'},
+
+    {title: 'Radier y fundaciones', cam: 'radier', parts: [['radier', nu(S.radier + S.patio, 'm²')], ['dado', String(S.dados)]],
+     text: 'Sobre la zona plana se hace el radier: la losa de hormigón que es el piso del zócalo. Bajo cada pilar de las terrazas va un dado de hormigón.',
+     acts: [['Radier del zócalo.', [8, 0.05, 6.5], [0, 0]],
+            ['Piso del patio inglés.', [0.9, 0.05, 12.5], [0, -14]],
+            ['Un dado bajo cada pilar: ' + S.dados + ' en total.', [-1.9, 0.12, -1.7], [-14, 12]]],
+     meta: 'Radier ' + nf(CASA.RADIER[1] - CASA.RADIER[0], 1) + ' × ' + nf(CASA.RADIER[3] - CASA.RADIER[2], 1) + ' m = ' + nf(S.radier) + ' m² · patio inglés ' + nf(S.patio) + ' m² · ' + S.dados + ' dados (60 × 60 cm, aprox.)',
+     dims: [{a: [-9.57, 0.05, -0.14], b: [22.3, 0.05, -0.14], off: [0, 0, -2.6], label: nf(CASA.RADIER[1] - CASA.RADIER[0], 1) + ' m'},
+            {a: [22.3, 0.05, -0.14], b: [22.3, 0.05, 12.13], off: [1.6, 0, 0], label: nf(CASA.RADIER[3] - CASA.RADIER[2], 1) + ' m'}],
+     detail: {p: [1.86, 0.1, -1.7], r: 0.9},
+     tip: 'Deja las pasadas de agua y desagüe antes de hormigonar: después hay que romper.'},
+
+    {title: 'Muros del zócalo', cam: 'zocalo', parts: [['muroZ', nu(S.zLen, 'm')], ['ventanal', String(S.zVentanal)], ['ventana', String(S.zVentana)], ['futuro', 'después']],
+     text: 'Se levantan los muros del piso de abajo y el gran ventanal que mira al lago.',
+     acts: [['Adelante: dormitorios 3, 4 y 5 y la sala de estar.', [-1.8, 2.75, 5.8], [0, -14]],
+            ['Atrás: lavado, baño 4, escalera y bodegas.', [9, 2.75, 10.5], [0, -14]],
+            ['Ventanal al lago: 4 paños corredizos, ' + nf(S.zGlassLen, 1) + ' m.', [10, 1.4, 3.6], [0, 16]],
+            ['Lo transparente queda para después: futuro baño 5 y dormitorio 6.', [17.5, 1.5, 6], [8, -16]]],
+     meta: 'Muros de 2,70 m (alto aprox.) · ' + nf(S.zLen) + ' m de muro · ' + (S.zVentanal + S.zVentana) + ' ventanas y ventanales',
+     dims: [{a: [-7.42, 0.05, 3.6], b: [12.92, 0.05, 3.6], off: [0, 0, -4.4], label: nf(S.zGlassLen, 1) + ' m'},
+            {a: [22.3, 0.05, 3.6], b: [22.3, 2.75, 3.6], off: [1.4, 0, 0], label: '2,70 m'}],
+     tip: 'Los muros que quedan contra el cerro llevan impermeabilización por fuera.'},
+
+    {title: 'Losa del primer piso y estructura de terrazas', cam: 'losa', parts: [['pilar', String(S.postes)], ['viga', nu(S.deck, 'm²')], ['losa', nu(S.losa, 'm²')]],
+     text: 'Encima del zócalo va la losa del primer piso. Hacia el lago, pilares y vigas arman la estructura de las terrazas.',
+     acts: [['Pilares: ' + S.postes + ', cada uno sobre su dado.', [9.3, 1.5, -1.7], [12, 8]],
+            ['Vigas de las terrazas, cada 80 cm (aprox.).', [15, 2.85, 2.5], [0, -16]],
+            ['Losa del primer piso: ' + nf(S.losa) + ' m².', [4, 3, 8], [0, -14]]],
+     meta: 'Losa ' + nf(S.losa) + ' m² · terrazas ' + nf(S.deck) + ' m² · ' + S.postes + ' pilares',
+     dims: [{a: [22.28, 0, 1.52], b: [22.28, 3, 1.52], off: [1.4, 0, 0], label: '3,0 m'}],
+     tip: 'El hueco que queda en la losa es para la escalera interior.'},
+
+    {title: 'Muros y ventanales del primer piso', cam: 'piso1', parts: [['muro1', nu(S.fLen, 'm')], ['ventanal', String(S.fVentanal)], ['ventana', String(S.fVentana)], ['chimenea', '2']],
+     text: 'Sobre la losa se arman tres volúmenes. Mirando desde el lago: al centro living, comedor y cocina; a la izquierda los dormitorios 1 y 2; a la derecha el quincho.',
+     acts: [['Volumen central, con ventanales al lago por dos lados.', [3.7, 4.5, 0], [0, 16]],
+            ['Ala de dormitorios, con sus baños.', [16, 5.7, 5.5], [0, -14]],
+            ['Quincho y patio de servicio.', [-4, 4.8, 9], [0, -14]],
+            ['Dos chimeneas: una en el living y otra en el quincho.', [6.98, 5.7, 3.9], [10, -14]]],
+     meta: nf(S.fLen) + ' m de muro · ' + (S.fVentanal + S.fVentana) + ' ventanas y ventanales',
+     tip: 'La puerta de entrada da a la plataforma alta, por detrás de la casa.'},
+
+    {title: 'Terrazas, barandas y escaleras', cam: 'terrazas', parts: [['tabla', nu(S.deck, 'm²')], ['baranda', nu(S.railLen, 'm')], ['escInt', '1'], ['escExt', '1']],
+     text: 'Se pone el piso de madera de las terrazas, las barandas de vidrio y las dos escaleras.',
+     acts: [['Piso de las terrazas: ' + nf(S.deck) + ' m².', [14, 3, 2.5], [0, 14]],
+            ['Barandas de vidrio, 1,05 m de alto.', [3.7, 4.05, -1.7], [0, 16]],
+            ['Escalera interior en U (forma aprox.), del zócalo al primer piso: en el círculo.', [9.7, 3, 10.2], [0, -14]],
+            ['Escalera exterior de piedra: 17 peldaños, del estacionamiento a la zona plana.', [-10.5, 1.5, 4.2], [-12, 0]]],
+     meta: 'Terrazas ' + nf(S.deck) + ' m² · barandas ' + nf(S.railLen) + ' m · peldaños 16 adentro + 17 afuera',
+     detail: {p: [9.75, 1.4, 10.2], r: 2.3, view: [0.35, 1.3, -0.8], hide: ['losa', 'tablas', 'muro1', 'vent1', 'ventanas1', 'barandas', 'muroZ', 'chim']},
+     tip: 'En el círculo se sacó la losa del dibujo para que veas la escalera.'},
+
+    {title: 'Techo', cam: 'techo', parts: [['techo', nu(S.roof, 'm²')], ['fronton', '6'], ['canon', '2'], ['pilar', '2']],
+     text: 'Tres techos a dos aguas. El del centro, sobre el living, es más alto y más empinado que los de los lados.',
+     acts: [['Techo central: ≈ 35°, cumbrera a ≈ ' + nf(S.ridgeC, 1) + ' m del piso del zócalo.', [1.5, 6.9, 1.5], [-6, 0]],
+            ['Techo del ala de dormitorios: ≈ 22°.', [16, 7.2, 4.5], [0, -14]],
+            ['Techo del quincho: ≈ 22°, igual al del ala.', [-4, 7.2, 4.5], [0, -14]],
+            ['Frontones, dos pilares del alero y los cañones de chimenea.', [7.05, 9.5, 3.95], [14, -12]]],
+     meta: 'Techo ≈ ' + nf(S.roof) + ' m² · cumbreras a ≈ ' + nf(S.ridgeC, 1) + ' y ' + nf(S.ridgeA, 1) + ' m (pendientes aprox.)',
+     dims: [{a: [7.85, 0.05, -1.9], b: [7.85, S.ridgeC, -1.9], off: [0, 0, -1.6], label: '≈ ' + nf(S.ridgeC, 1) + ' m'}],
+     tip: 'El frontón del living, el que mira al lago, es de vidrio.'},
+
+    {title: 'Revestimiento y terminaciones', cam: 'revest', parts: [['revest', nu(S.clad, 'm²')], ['marco', String(S.ventanas)]],
+     text: 'Por fuera, los muros se forran con madera oscura en tablas horizontales. Todas las ventanas llevan marco negro.',
+     acts: [['Revestimiento en los muros de los extremos y en los de atrás, hacia el cerro.', [22.2, 4.5, 5.6], [14, 0]],
+            ['Marcos en los ventanales que miran al lago.', [17, 4.3, 3.56], [0, 18]],
+            ['El mismo revestimiento en el zócalo.', [22.3, 1.4, 5.8], [14, 6]]],
+     meta: '≈ ' + nf(S.clad) + ' m² de revestimiento (aprox.) · ' + S.ventanas + ' marcos',
+     detail: {p: [22.36, 4.4, 5.4], r: 1.4, view: [1, 0.3, -0.45]},
+     tip: 'Las tablas van horizontales, igual en los dos pisos.'},
+
+    {title: 'Interiores', cam: 'interior', parts: [['sofa', String(S.sofas)], ['cama', String(S.camas)], ['mesa', String(S.mesas)], ['silla', String(S.sillas)],
+       ['mueble', String(S.muebles)], ['sanitario', String(S.sanitarios)], ['cocina', '1']],
+     cut: ['techoC', 'techoA', 'techoQ', 'fronton', 'canon', 'postesAlero', 'muro1', 'vent1', 'ventanas1', 'revN', 'revS', 'revE', 'revW', 'marcos'],
+     text: 'Adentro: living y comedor, la cocina con isla, los dormitorios y los baños. En el círculo, la sala de estar del zócalo.',
+     acts: [['Living y comedor.', [2.8, 3.5, 3], [0, 0]],
+            ['Cocina con isla y 4 pisos.', [2.8, 4, 9], [0, 0]],
+            ['Dormitorios 1 y 2.', [19.4, 3.6, 6.8], [0, 0]],
+            ['Quincho: mesa larga y parrilla.', [-3.7, 3.8, 9.3], [0, 0]]],
+     meta: S.camas + ' camas · ' + S.sofas + ' sofás · ' + S.mesas + ' mesas · ' + S.sillas + ' sillas',
+     detail: {p: [3.2, 0.6, 5.6], r: 3.1, view: [-0.25, 1.7, -0.6],
+              hide: ['losa', 'tablas', 'vigas', 'muro1', 'vent1', 'ventanas1', 'techoC', 'techoA', 'techoQ', 'fronton', 'canon', 'postesAlero', 'chim', 'barandas', 'escInt',
+                     'revN', 'revS', 'revE', 'revW', 'marcos', 'sofa1', 'cama1', 'mesa1', 'silla1', 'mueble1', 'bano1', 'cocina1']},
+     tip: 'Los muebles son de referencia: no vienen de los planos.'},
+
+    {title: 'Paisajismo', cam: 'jardin', parts: [['pasto', nu(S.lawn, 'm²')], ['camino', String(S.stones)], ['arbol', String(S.trees)], ['roca', String(S.rocks)]],
+     text: 'Por último, el jardín: pasto en la zona plana, un camino de piedras hacia el lago, algunos árboles y rocas.',
+     acts: [['Pasto adelante y al lado este.', [14, 0.03, -2.2], [0, 14]],
+            ['Camino de piedras hacia el lago.', [-5.4, -0.9, -7.3], [-14, 8]],
+            ['Árboles detrás de la casa y al lado este.', [24.1, 3.5, 6.5], [12, -8]],
+            ['Rocas grandes en la pendiente.', [17.8, -0.4, -5.2], [10, 12]]],
+     meta: 'Pasto ≈ ' + nf(S.lawn) + ' m² · ' + S.trees + ' árboles · ' + S.stones + ' piedras de camino (aprox.)',
+     tip: 'Los árboles están donde los dibujó el arquitecto; el pasto, las rocas y el camino son una sugerencia.'},
+
+    {title: 'La casa terminada', cam: 'final',
+     text: 'Así queda. Para volver a ver un paso, usa Atrás o empieza de nuevo desde las piezas.',
+     calendar: [['Pasos 1–3', 'Terreno, muros de contención, radier y dados'], ['Pasos 4–6', 'Zócalo, losa y primer piso'],
+                ['Pasos 7–9', 'Terrazas, techo y revestimiento'], ['Pasos 10–11', 'Interiores y jardín']]}
+  ]
+};
+(function(){
+var T = THREE;
+var $ = function(s){ return document.querySelector(s); };
+var canvas = $('#c'), stage = $('.stage');
+var hm = /^#step(\d+)(&still)?$/.exec(location.hash || '');
+var STILL = !!(hm && hm[2]);                       /* capture mode: no tweens, no idle drift */
+var reduce = STILL || matchMedia('(prefers-reduced-motion: reduce)').matches;
+var INK = 0x141414, ACCENT = CONFIG.accent, FILL = CONFIG.fill, GREY = 0xececec, WHITE = 0xffffff;
+var VIEW = new T.Vector3().fromArray(CONFIG.view).normalize();
+var CAM = CONFIG.CAM, NAMES = CONFIG.NAMES, INVENTORY = CONFIG.INVENTORY, STEPS = CONFIG.STEPS;
+/* units: cm per scene unit (Modulor figure), glyph = size of arrows, ticks and dots, bar = scale-bar steps. Default: feet. */
+var U = CONFIG.units || {cm: 30.48, glyph: 1, bar: [[10, '10 ft'], [5, '5 ft'], [2, '2 ft'], [1, '1 ft'], [0.5, '6 in'], [1 / 12, '1 in']]}, G = U.glyph;
+document.title = CONFIG.title.charAt(0).toUpperCase() + CONFIG.title.slice(1); $('#h1').textContent = CONFIG.title; $('#sub').textContent = CONFIG.subtitle || '';
+document.documentElement.style.setProperty('--accent', '#' + ('00000' + ACCENT.toString(16)).slice(-6));
+
+/* ---------- renderer, lights, cel shading ---------- */
+var renderer = new T.WebGLRenderer({canvas: canvas, antialias: true, alpha: false, preserveDrawingBuffer: true});
+renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+renderer.setClearColor(0xffffff, 1);
+renderer.shadowMap.enabled = true; renderer.shadowMap.type = T.PCFSoftShadowMap; renderer.shadowMap.autoUpdate = false;
+var scene = new T.Scene();
+var world = new T.Group(); scene.add(world);
+scene.add(new T.HemisphereLight(0xffffff, 0xffffff, 0.9));
+var sun = new T.DirectionalLight(0xffffff, 0.16); sun.castShadow = true;
+sun.shadow.mapSize.set(STILL ? 1024 : 2048, STILL ? 1024 : 2048); sun.shadow.bias = -0.0006; sun.shadow.normalBias = 0.03;
+scene.add(sun); scene.add(sun.target);
+var camera = new T.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
+var planCam = new T.OrthographicCamera(-1, 1, 1, -1, 1, 400); planCam.up.set(0, 0, -1); planCam.layers.enable(1);
+var detailCam = new T.OrthographicCamera(-1, 1, 1, -1, 0.1, 500);
+var gm = new T.DataTexture(new Uint8Array([226, 226, 226, 241, 241, 241, 255, 255, 255]), 3, 1, T.RGBFormat); gm.minFilter = T.NearestFilter; gm.magFilter = T.NearestFilter; gm.needsUpdate = true;
+
+/* ---------- helpers (units: CONFIG.units) ---------- */
+function v(a){ return new T.Vector3(a[0], a[1], a[2]); }
+function mat(color, opacity){ var o = opacity == null ? 1 : opacity; return new T.MeshToonMaterial({color: color, gradientMap: gm, transparent: o < 1, opacity: o}); }
+function edgesOf(geo, opacity){ return new T.LineSegments(new T.EdgesGeometry(geo, 24), new T.LineBasicMaterial({color: INK, transparent: true, opacity: opacity == null ? 0.72 : opacity})); }
+function mesh(geo, color, o){ o = o || {}; var m = new T.Mesh(geo, mat(color, o.opacity)); m.castShadow = !o.noShadow; m.receiveShadow = true; if (o.edge !== false) m.add(edgesOf(geo, o.edge)); return m; }
+function box(w, h, d, color, o){ return mesh(new T.BoxGeometry(w, h, d), color, o); }
+function cyl(rt, rb, h, color, seg, o){ o = o || {}; if (o.edge == null) o.edge = false; return mesh(new T.CylinderGeometry(rt, rb, h, seg || 14), color, o); }
+function sphere(r, color, o){ o = o || {}; if (o.edge == null) o.edge = false; return mesh(new T.SphereGeometry(r, 12, 9), color, o); }
+function tube(points, r, color, tension){ var c = new T.CatmullRomCurve3(points, false, 'catmullrom', tension == null ? 0.2 : tension); var m = mesh(new T.TubeGeometry(c, Math.max(60, points.length * 24), r, 8, false), color, {edge: false}); m.userData.length = c.getLength(); return m; }
+function lines(pts, color, opacity){ return new T.LineSegments(new T.BufferGeometry().setFromPoints(pts), new T.LineBasicMaterial({color: color == null ? INK : color, transparent: true, opacity: opacity == null ? 0.5 : opacity})); }
+function at(obj, x, y, z){ obj.position.set(x, y, z); return obj; }
+function rot(obj, x, y, z){ obj.rotation.set(x || 0, y || 0, z || 0); return obj; }
+function group(){ var g = new T.Group(); for (var i = 0; i < arguments.length; i++) g.add(arguments[i]); return g; }
+function centre(g){ /* bbox centre into g.position, children shifted back: arrows and ghosts land where the part really is */
+  g.updateMatrixWorld(true); var bb = new T.Box3().setFromObject(g); if (bb.isEmpty()) return g; var c = bb.getCenter(new T.Vector3());
+  var local = g.worldToLocal(c.clone()); g.children.forEach(function(ch){ ch.position.sub(local); }); g.position.add(local.applyQuaternion(g.quaternion).multiply(g.scale)); return g; }
+function arrow(from, to){
+  var dir = new T.Vector3().subVectors(to, from); var len = dir.length(); if (len < 0.01) return new T.Group();
+  var sc = Math.min(1, len / (2.2 * G)) * G; var g = new T.Group(); var hl = 0.42 * sc, sl = Math.max(0.05 * G, len - hl);
+  var shaft = new T.Mesh(new T.CylinderGeometry(0.055 * sc, 0.055 * sc, sl, 10), mat(ACCENT)); shaft.position.y = sl / 2;
+  var head = new T.Mesh(new T.ConeGeometry(0.2 * sc, hl, 14), mat(ACCENT)); head.position.y = len - hl / 2;
+  g.add(shaft); g.add(head); g.position.copy(from); g.quaternion.setFromUnitVectors(new T.Vector3(0, 1, 0), dir.clone().normalize());
+  return g;
+}
+function setOpacity(obj, o){ obj.traverse(function(n){ if (n.material){ if (n.material.userData.base == null) n.material.userData.base = n.material.opacity; var val = n.material.userData.base * o; n.material.opacity = val; n.material.transparent = val < 0.999 || n.material.userData.base < 1; } }); }
+function setColor(obj, hex){ obj.traverse(function(n){ if (n.material && n.material.color && !n.isLineSegments) n.material.color.setHex(hex); }); }
+function paint(obj, hex){ obj.traverse(function(n){ if (n.isMesh && n.material.color && !n.material.map) n.material.color.setHex(hex); }); }
+function ghostOf(o){ /* a faint outline of the part where it will land */
+  var g = o.clone(true); g.traverse(function(n){ if (n.isMesh){ n.material = new T.MeshBasicMaterial({color: INK, transparent: true, opacity: 0.16, depthWrite: false}); n.castShadow = false; n.receiveShadow = false; } else if (n.isLineSegments){ n.material = n.material.clone(); n.material.transparent = true; n.material.opacity = 0.6; } });
+  g.position.copy(o.userData.dest); g.visible = true; return g; }
+
+/* walls: a room's walls go in this group via wall(); a step's walls {h, sides} tweens those sides down to h ft (section cut) */
+var walls = new T.Group(); world.add(walls); var WALLS = [];
+function wall(side, x0, x1, y0, y1, z0, z1){ var h = y1 - y0; var geo = new T.BoxGeometry(x1 - x0, h, z1 - z0); geo.translate(0, h / 2, 0); var m = mesh(geo, WHITE, {edge: 0.5}); m.position.set((x0 + x1) / 2, y0, (z0 + z1) / 2); m.userData.wall = {side: side, y0: y0, y1: y1}; walls.add(m); WALLS.push(m); return m; }
+
+/* registry of step objects: reg(key, obj, {add, remove, only:[pages], from, lag, each, span, part, grow, noGhost, noArrow}) */
+var objs = {}; var order = [];
+function reg(key, obj, o){ o = o || {}; if (!obj.isMesh && obj.children.length) centre(obj); var u = obj.userData; u.dest = obj.position.clone(); u.from = o.from || new T.Vector3(0, 2.6, 0);
+  u.add = o.add == null ? 0 : o.add; u.remove = o.remove; u.only = o.only; u.lag = o.lag || 0; u.each = !!o.each; u.span = o.span || 0.9; u.noArrow = !!o.noArrow; u.part = o.part; u.grow = !!o.grow; u.noGhost = !!o.noGhost;
+  world.add(obj); objs[key] = obj; order.push(key); return obj; }
+var P = {};   /* part builders, used in the scene and for the thumbnails; keys match NAMES */
+
+/* ======================================================================
+   PROJECT SCENE: context geometry (painted white), walls, P builders, reg() calls.
+   ====================================================================== */
+var C = CASA, LZ = C.LV_Z, LF = C.LV_F;
+function V3(x, y, z){ return new T.Vector3(x, y, z); }
+/* Kit: collects boxes in v1's box() order [x0,x1,y0,y1,z0,z1] and bakes one part = one merged mesh + one set of ink edges
+   (+ an optional glass mesh and loose lines), so the whole house stays around a hundred draw calls */
+function Kit(){ this.s = []; this.g = []; this.l = []; }
+Kit.prototype.box = function(b, glass){ var w = b[1] - b[0], h = b[3] - b[2], d = b[5] - b[4]; if (w <= 0.001 || h <= 0.001 || d <= 0.001) return this;
+  var g = new T.BoxGeometry(w, h, d); g.translate((b[0] + b[1]) / 2, (b[2] + b[3]) / 2, (b[4] + b[5]) / 2); (glass ? this.g : this.s).push(g); return this; };
+Kit.prototype.boxes = function(list, glass){ var k = this; (list || []).forEach(function(b){ k.box(b, glass); }); return this; };
+Kit.prototype.geo = function(g, glass){ (glass ? this.g : this.s).push(g); return this; };
+Kit.prototype.seg = function(a, b){ this.l.push(a[0], a[1], a[2], b[0], b[1], b[2]); return this; };
+function merged(list){ var parts = list.map(function(g){ return g.index ? g.toNonIndexed() : g; }), n = 0; parts.forEach(function(g){ n += g.attributes.position.array.length; });
+  var P3 = new Float32Array(n), N3 = new Float32Array(n), o = 0;
+  parts.forEach(function(g){ P3.set(g.attributes.position.array, o); N3.set(g.attributes.normal.array, o); o += g.attributes.position.array.length; });
+  var out = new T.BufferGeometry(); out.setAttribute('position', new T.BufferAttribute(P3, 3)); out.setAttribute('normal', new T.BufferAttribute(N3, 3)); return out; }
+function inkLines(arr, opacity){ var geo = new T.BufferGeometry(); geo.setAttribute('position', new T.Float32BufferAttribute(arr, 3));
+  return new T.LineSegments(geo, new T.LineBasicMaterial({color: INK, transparent: true, opacity: opacity})); }
+function edgeArr(list, thr){ var arr = []; list.forEach(function(g){ var e = new T.EdgesGeometry(g, thr || 24).attributes.position.array; for (var i = 0; i < e.length; i++) arr.push(e[i]); }); return arr; }
+function bake(k, o){ o = o || {}; var g = new T.Group();
+  if (k.s.length){ var m = mesh(merged(k.s), WHITE, {edge: false, opacity: o.opacity}); m.add(inkLines(edgeArr(k.s), o.edge || 0.72)); g.add(m); }
+  if (k.g.length){ var gm2 = mesh(merged(k.g), WHITE, {edge: false, opacity: o.glass || 0.3, noShadow: true}); gm2.add(inkLines(edgeArr(k.g), o.glassEdge || 0.5)); g.add(gm2); }
+  if (k.l.length) g.add(inkLines(k.l, o.lines || 0.28));
+  return g; }
+/* a polygon in a cross-section plane, extruded: axis 'z' → shape in (x, y); axis 'x' → shape in (z, y) */
+function prism(pts, axis, a0, a1){ var s = new T.Shape(); s.moveTo(pts[0][0], pts[0][1]); for (var i = 1; i < pts.length; i++) s.lineTo(pts[i][0], pts[i][1]);
+  var g = new T.ExtrudeGeometry(s, {depth: a1 - a0, bevelEnabled: false}); var m = new T.Matrix4();
+  if (axis === 'z') m.makeTranslation(0, 0, a0); else m.set(0, 0, -1, a1, 0, 1, 0, 0, 1, 0, 0, 0, 0, 0, 0, 1);
+  g.applyMatrix4(m); return g; }
+/* v1's gable(): two sloped plates (0.12 thick) plus standing-seam lines every 0.5 m on top */
+function gableInto(k, r){ var q = C.gable(r), th = 0.12, cp = Math.cos(q.p), tp = Math.tan(q.p), cy = r[4] + q.rise / 2 + th / (2 * cp);
+  [-1, 1].forEach(function(s){ var g;
+    if (r[6] === 'x'){ g = new T.BoxGeometry(r[1] - r[0], th, q.L); g.rotateX(s * q.p); g.translate((r[0] + r[1]) / 2, cy, (r[2] + r[3]) / 2 + s * q.half / 2); }
+    else { g = new T.BoxGeometry(q.L, th, r[3] - r[2]); g.rotateZ(-s * q.p); g.translate((r[0] + r[1]) / 2 + s * q.half / 2, cy, (r[2] + r[3]) / 2); }
+    k.geo(g);
+    var yTop = function(d){ return r[4] + q.rise - d * tp + th / cp + 0.012; }, dEnd = q.half + 0.04 * cp, mid = r[6] === 'x' ? (r[2] + r[3]) / 2 : (r[0] + r[1]) / 2;
+    var lo = r[6] === 'x' ? r[0] : r[2], hi = r[6] === 'x' ? r[1] : r[3];
+    for (var a = lo + 0.25; a < hi; a += 0.5){ var d0 = 0.02, d1 = dEnd - 0.02;
+      if (r[6] === 'x') k.seg([a, yTop(d0), mid + s * d0], [a, yTop(d1), mid + s * d1]); else k.seg([mid + s * d0, yTop(d0), a], [mid + s * d1, yTop(d1), a]); } });
+  return q; }
+
+/* ---------- context: a trimmed patch of the hillside, cut like a site model (v1's terrainH) ---------- */
+(function(){ var S0 = C.SITE, st = 0.25, nx = Math.round((S0.x1 - S0.x0) / st), nz = Math.round((S0.z1 - S0.z0) / st), Hs = [], i, j;
+  for (j = 0; j <= nz; j++) for (i = 0; i <= nx; i++) Hs.push(C.terrainH(S0.x0 + i * st, S0.z0 + j * st));
+  var h = function(i, j){ return Hs[j * (nx + 1) + i]; }, top = [], side = [];
+  for (j = 0; j < nz; j++) for (i = 0; i < nx; i++){ var x0 = S0.x0 + i * st, x1 = x0 + st, z0 = S0.z0 + j * st, z1 = z0 + st;
+    var a = [x0, h(i, j), z0], b = [x1, h(i + 1, j), z0], c = [x1, h(i + 1, j + 1), z1], d = [x0, h(i, j + 1), z1];
+    top.push.apply(top, a.concat(d, c, a, c, b)); }
+  var B = S0.base, quad = function(p, q){ side.push.apply(side, p.concat([q[0], B, q[2]], q, p, [p[0], B, p[2]], [q[0], B, q[2]])); };
+  for (i = 0; i < nx; i++){ quad([S0.x0 + (i + 1) * st, h(i + 1, 0), S0.z0], [S0.x0 + i * st, h(i, 0), S0.z0]); quad([S0.x0 + i * st, h(i, nz), S0.z1], [S0.x0 + (i + 1) * st, h(i + 1, nz), S0.z1]); }
+  for (j = 0; j < nz; j++){ quad([S0.x0, h(0, j), S0.z0 + j * st], [S0.x0, h(0, j + 1), S0.z0 + (j + 1) * st]); quad([S0.x1, h(nx, j + 1), S0.z0 + (j + 1) * st], [S0.x1, h(nx, j), S0.z0 + j * st]); }
+  [[top, 10, 0.5], [side, 10, 0.45]].forEach(function(t){ var g = new T.BufferGeometry(); g.setAttribute('position', new T.Float32BufferAttribute(t[0], 3)); g.computeVertexNormals();
+    var m = mesh(g, WHITE, {edge: false}); m.material.side = T.DoubleSide; m.add(inkLines(new T.EdgesGeometry(g, t[1]).attributes.position.array, t[2])); world.add(m); });
+})();
+
+/* ---------- P: part builders for the thumbnails (small, representative pieces; keys match NAMES) ---------- */
+function kitOf(list, glassList, lines){ var k = new Kit().boxes(list); if (glassList) k.boxes(glassList, true); (lines || []).forEach(function(s){ k.seg(s[0], s[1]); }); return bake(k); }
+P.corte = function(){ return bake(new Kit().geo(prism([[0, 0], [3, 0], [3, 3]], 'x', 0, 3))); };
+P.contencion = function(){ return kitOf([[0, 3.2, 0, 3, 0, 0.5]]); };
+P.radier = function(){ return kitOf([[0, 4, 0, 0.12, 0, 3]]); };
+P.dado = function(){ return kitOf([[0, 0.6, 0, 0.52, 0, 0.6], [0.21, 0.39, 0.52, 1.4, 0.21, 0.39]]); };
+P.muroZ = function(){ return kitOf([[0, 3, 0, 2.7, 0, 0.2]]); };
+P.ventanal = function(){ return kitOf([], [[0, 2.4, 0, 2.7, 0, 0.03]], [[[1.2, 0, 0.02], [1.2, 2.7, 0.02]]]); };
+P.ventana = function(){ return kitOf([[0, 2.4, 0, 0.9, 0, 0.2], [0, 2.4, 2.2, 2.7, 0, 0.2]], [[0, 2.4, 0.9, 2.2, 0.085, 0.115]]); };
+P.futuro = function(){ return bake(new Kit().boxes([[0, 3, 0, 2.7, 0, 0.2]]), {opacity: 0.3, edge: 0.35}); };
+P.pilar = function(){ return kitOf([[0, 0.18, 0, 3, 0, 0.18]]); };
+P.viga = function(){ var b = [[0, 3, 0, 0.25, 0, 0.15], [0, 3, 0, 0.25, 1.85, 2]]; for (var x = 0.3; x < 3; x += 0.8) b.push([x, x + 0.08, 0.02, 0.22, 0.15, 1.85]); return kitOf(b); };
+P.losa = function(){ return kitOf([[0, 4, 0, 0.25, 0, 3]]); };
+P.muro1 = function(){ return kitOf([[0, 1.2, 0, 2.7, 0, 0.2], [1.2, 2.4, 0, 0.95, 0, 0.2], [1.2, 2.4, 2.2, 2.7, 0, 0.2], [2.4, 3.2, 0, 2.7, 0, 0.2]], [[1.2, 2.4, 0.95, 2.2, 0.085, 0.115]]); };
+P.chimenea = function(){ return kitOf([[0, 0.64, 0, 2.7, 0, 1.65], [-0.03, 0.01, 0.35, 1.1, 0.4, 1.25]]); };
+P.tabla = function(){ var l = []; for (var z = 0.3; z < 2; z += 0.3) l.push([[0, 0.052, z], [3, 0.052, z]]); return kitOf([[0, 3, 0, 0.05, 0, 2]], null, l); };
+P.baranda = function(){ return kitOf([[0, 2.4, 0.95, 1.0, -0.03, 0.03]], [[0, 2.4, 0, 0.95, -0.015, 0.015]]); };
+P.escInt = function(){ var b = []; for (var i = 0; i < 8; i++) b.push([i * 0.25, i * 0.25 + 0.25, 0, (i + 1) * 1.5 / 8, 0, 1.0]); b.push([2.0, 2.7, 1.35, 1.55, 0, 2.2]);
+  for (i = 0; i < 8; i++){ var x1 = 2.0 - i * 0.25, t = 1.55 + (i + 1) * 1.45 / 8; b.push([x1 - 0.25, x1, t - 0.2, t, 1.1, 2.2]); } return kitOf(b); };
+P.escExt = function(){ var b = []; for (var i = 0; i < 6; i++) b.push([0, 1, 0, 1.5 - i * 0.25, i * 0.26, (i + 1) * 0.26]); return kitOf(b); };
+P.techo = function(){ var k = new Kit(); gableInto(k, [0, 3, 0, 3, 0, 30, 'x']); return bake(k, {lines: 0.5}); };
+P.fronton = function(){ return bake(new Kit().geo(prism([[0, 0], [4, 0], [2, 1.6]], 'z', 0, 0.06))); };
+P.canon = function(){ return kitOf([[0, 0.5, 0, 3, 0, 0.7]]); };
+P.revest = function(){ var l = []; for (var y = 0.3; y < 2.7; y += 0.3) l.push([[0, y, -0.003], [3, y, -0.003]]); return kitOf([[0, 3, 0, 2.7, 0, 0.05]], null, l); };
+P.marco = function(){ return kitOf([[0, 2.4, 0, 0.05, 0, 0.07], [0, 2.4, 2.65, 2.7, 0, 0.07], [0, 0.05, 0, 2.7, 0, 0.07], [1.175, 1.225, 0, 2.7, 0, 0.07], [2.35, 2.4, 0, 2.7, 0, 0.07]]); };
+function sofaBoxes(x0, x1, z0, z1, b, back){ var t = 0.22, o = [[x0, x1, b, b + 0.42, z0, z1]];
+  if (back === 'n') o.push([x0, x1, b, b + 0.82, z0, z0 + t]); if (back === 's') o.push([x0, x1, b, b + 0.82, z1 - t, z1]);
+  if (back === 'w') o.push([x0, x0 + t, b, b + 0.82, z0, z1]); if (back === 'e') o.push([x1 - t, x1, b, b + 0.82, z0, z1]); return o; }
+function bedBoxes(x0, x1, z0, z1, b, head){ var hb = 0.08, o = [[x0, x1, b, b + 0.3, z0, z1], [x0 + 0.04, x1 - 0.04, b + 0.3, b + 0.55, z0 + 0.04, z1 - 0.04]];
+  if (head === 's') o.push([x0, x1, b, b + 1.1, z1 - hb, z1], [x0 + 0.02, x1 - 0.02, b + 0.55, b + 0.6, z0 + 0.02, z0 + (z1 - z0) * 0.32]);
+  if (head === 'n') o.push([x0, x1, b, b + 1.1, z0, z0 + hb], [x0 + 0.02, x1 - 0.02, b + 0.55, b + 0.6, z1 - (z1 - z0) * 0.32, z1 - 0.02]);
+  if (head === 'w') o.push([x0, x0 + hb, b, b + 1.1, z0, z1], [x1 - (x1 - x0) * 0.32, x1 - 0.02, b + 0.55, b + 0.6, z0 + 0.02, z1 - 0.02]);
+  if (head === 'e') o.push([x1 - hb, x1, b, b + 1.1, z0, z1], [x0 + 0.02, x0 + (x1 - x0) * 0.32, b + 0.55, b + 0.6, z0 + 0.02, z1 - 0.02]); return o; }
+function tableBoxes(x0, x1, z0, z1, b, h){ h = h || 0.75; var l = 0.06, o = [[x0, x1, b + h - 0.05, b + h, z0, z1]];
+  [[x0 + 0.08, z0 + 0.08], [x1 - 0.08 - l, z0 + 0.08], [x0 + 0.08, z1 - 0.08 - l], [x1 - 0.08 - l, z1 - 0.08 - l]].forEach(function(p){ o.push([p[0], p[0] + l, b, b + h - 0.05, p[1], p[1] + l]); }); return o; }
+function chairBox(cx, cz, b){ return [cx - 0.21, cx + 0.21, b, b + 0.46, cz - 0.21, cz + 0.21]; }
+P.sofa = function(){ return kitOf(sofaBoxes(0, 2.2, 0, 0.9, 0, 'n')); };
+P.cama = function(){ return kitOf(bedBoxes(0, 1.6, 0, 2.0, 0, 's')); };
+P.mesa = function(){ return kitOf(tableBoxes(0, 1.6, 0, 0.9, 0)); };
+P.silla = function(){ return kitOf([chairBox(0, 0, 0)]); };
+P.mueble = function(){ return kitOf([[0, 1.2, 0, 2.2, 0, 0.55]]); };
+P.sanitario = function(){ return kitOf([[0, 0.42, 0, 0.42, 0, 0.65], [0, 0.42, 0.42, 0.8, 0, 0.16]]); };
+P.cocina = function(){ return kitOf([[0, 1.72, 0, 0.9, 0, 1.0], [-0.05, 1.77, 0.9, 0.95, -0.05, 1.05], [0.25, 0.61, 0, 0.72, -0.5, -0.14], [1.1, 1.46, 0, 0.72, -0.5, -0.14]]); };
+P.pasto = function(){ var l = [], r = 0.37; for (var i = 0; i < 40; i++){ r = (r * 9301 + 0.4927) % 1; var x = r * 2.8 + 0.1; r = (r * 9301 + 0.2213) % 1; var z = r * 1.8 + 0.1; l.push([[x, 0.03, z], [x - 0.05, 0.2, z]], [[x, 0.03, z], [x + 0.06, 0.18, z]]); }
+  return kitOf([[0, 3, 0, 0.03, 0, 2]], null, l); };
+P.camino = function(){ return kitOf([[0, 1.2, 0, 0.4, 0, 0.7]]); };
+P.arbol = function(r){ r = r || 1.6; var g = new T.Group(); g.add(at(cyl(0.12 * r / 1.6, 0.18 * r / 1.6, 2.6 * r / 1.6, WHITE, 8, {edge: false}), 0, 1.3 * r / 1.6, 0));
+  var cr = new T.IcosahedronGeometry(r, 0); cr.scale(1, 1.15, 1); var m = mesh(cr, WHITE, {edge: 0.45}); m.position.y = 2.6 * r / 1.6 + r * 0.8; g.add(m); return g; };
+P.roca = function(r){ r = r || 0.9; var g = new T.DodecahedronGeometry(r, 0); g.scale(1.35, 0.7, 1); g.rotateY(0.6); return mesh(g, WHITE, {edge: 0.6}); };
+var THUMB_ONLY = {
+  ventanal: function(){ return bake(new Kit().boxes([[0, 2.4, 0, 2.7, 0, 0.03]], true).seg([1.2, 0, 0.02], [1.2, 2.7, 0.02]), {glass: 0.75}); },
+  baranda: function(){ return bake(new Kit().boxes([[0, 2.4, 0.95, 1.0, -0.03, 0.03]]).boxes([[0, 2.4, 0, 0.95, -0.015, 0.015]], true), {glass: 0.75}); }
+};
+
+/* ---------- step 2: the earth that comes out (the natural bank is not on the plans: drawn as a 45° bank, aprox.) ---------- */
+(function(){ var k = new Kit(), X1 = C.SITE.x1, X0 = C.SITE.x0;
+  k.geo(prism([[9.25, 0], [12.25, 0], [12.25, 3]], 'x', -9.75, X1));          /* talud del fondo */
+  k.box([-2, 4, 0, 3, 12.25, 13.5]);                                           /* el patio inglés */
+  k.geo(prism([[-9.75, 3], [-9.75, 0], [-6.75, 0]], 'z', 6.75, 12.25));        /* borde oeste, junto al patio de colgar */
+  k.geo(prism([[-11.25, 3], [-11.25, 0], [-8.25, 0]], 'z', 0.25, 6.75));       /* borde del estacionamiento */
+  k.geo(prism([[-2.75, 0], [0.25, 0], [0.25, 3]], 'x', X0, -11.25));           /* frente del estacionamiento */
+  reg('corte', bake(k, {edge: 0.5}), {add: 0, remove: 2, from: V3(0, 7, 0), part: 'corte'}); })();
+
+/* retaining walls, 0 → 3 m */
+function retKit(list){ var k = new Kit(); list.forEach(function(r){ k.box([r[0], r[1], 0, 3, r[2], r[3]]); }); return bake(k); }
+reg('muroFondo', retKit(C.RET.fondo), {add: 2, lag: 0.55, from: V3(0, 5, 0), part: 'contencion'});
+reg('muroPatio', retKit(C.RET.patio), {add: 2, lag: 0.8, from: V3(0, 5, 0), part: 'contencion'});
+reg('muroOeste', retKit(C.RET.oeste), {add: 2, lag: 1.05, from: V3(0, 5, 0), part: 'contencion'});
+
+/* ---------- step 3: radier and footings ---------- */
+reg('radier', kitOf([[C.RADIER[0], C.RADIER[1], -0.05, LZ, C.RADIER[2], C.RADIER[3]]]), {add: 3, from: V3(0, 4, 0), part: 'radier'});
+reg('patioPiso', kitOf([[C.PATIO[0], C.PATIO[1], 0, LZ, C.PATIO[2], C.PATIO[3]]]), {add: 3, lag: 0.3, from: V3(0, 3, 0), part: 'radier'});
+(function(){ var g = new T.Group(), P0 = C.POSTS; P0.terraza.concat(P0.alto, P0.zocalo, P0.pergola).forEach(function(p){ g.add(kitOf([[p[0] - 0.3, p[0] + 0.3, -0.4, 0.12, p[1] - 0.3, p[1] + 0.3]])); });
+  reg('dados', g, {add: 3, lag: 0.55, each: true, span: 0.7, from: V3(0, 2.5, 0), part: 'dado', noArrow: true}); })();
+
+/* ---------- walls: one piece per v1 room cluster (they land one after another) ---------- */
+function wallPieces(groups, base){ var solid = new T.Group(), win = new Kit(), frames = [], clad = {n: [], s: [], e: [], w: []};
+  Object.keys(groups).forEach(function(key){ var k = new Kit();
+    groups[key].forEach(function(p){ var r = C.wall(p, base); k.boxes(r.solid); win.boxes(r.glass, true); frames = frames.concat(r.frame); if (r.out) clad[r.out] = clad[r.out].concat(r.clad); });
+    solid.add(bake(k)); });
+  return {solid: solid, win: bake(win), frames: frames, clad: clad}; }
+function glassKit(list, base, frames){ var k = new Kit(), fr = []; list.forEach(function(p){ var r = C.glass(p, base, true); k.boxes(r.glass, true); fr = fr.concat(r.frame); }); frames.push.apply(frames, fr); return bake(k); }
+var FRAMES = [], CLAD = {n: [], s: [], e: [], w: []};
+function keep(w){ FRAMES = FRAMES.concat(w.frames); Object.keys(CLAD).forEach(function(s){ CLAD[s] = CLAD[s].concat(w.clad[s]); }); return w; }
+
+/* ---------- step 4: zócalo walls, the lake glazing, the rooms left for later ---------- */
+var WZ = keep(wallPieces(C.ZW, LZ));
+reg('muroZ', WZ.solid, {add: 4, each: true, span: 1.0, from: V3(0, 4, 0), part: 'muroZ'});
+reg('ventZ', glassKit(C.ZG, LZ, FRAMES), {add: 4, lag: 1.25, from: V3(0, 0, -4), part: 'ventanal'});
+reg('ventanasZ', WZ.win, {add: 4, lag: 1.35, from: V3(0, 2, 0), part: 'ventana', noArrow: true});
+(function(){ var k = new Kit(); C.ZFUT.forEach(function(p){ k.boxes(C.wall(p, LZ).solid); }); C.ZFUT_GLASS.forEach(function(p){ k.boxes(C.glass(p, LZ, false).glass); }); k.box(C.ZFUT_BED);
+  reg('futuro', bake(k, {opacity: 0.28, edge: 0.3}), {add: 4, lag: 1.6, from: V3(0, 3, 0), part: 'futuro'}); })();
+
+/* ---------- step 5: posts, deck beams, first-floor slab ---------- */
+function postBox(p){ return [p[0] - 0.09, p[0] + 0.09, p[2], p[3], p[1] - 0.09, p[1] + 0.09]; }
+(function(){ var g = new T.Group(), P0 = C.POSTS;
+  P0.terraza.concat(P0.alto, P0.zocalo).forEach(function(p){ g.add(kitOf([postBox(p)])); });
+  P0.pergola.forEach(function(p){ g.add(kitOf([[p[0] - 0.08, p[0] + 0.08, p[2], p[3], 7.84, 8.0]])); });
+  reg('postes', g, {add: 5, each: true, span: 0.7, from: V3(0, 4, 0), part: 'pilar', noArrow: true}); })();
+(function(){ var k = new Kit(); C.DECK.forEach(function(r){ var alongX = (r[1] - r[0]) >= (r[3] - r[2]), y0 = LF - 0.3, y1 = LF - 0.05, a;
+    if (alongX){ k.box([r[0], r[1], y0, y1, r[2], r[2] + 0.15]); k.box([r[0], r[1], y0, y1, r[3] - 0.15, r[3]]); for (a = r[0] + 0.4; a < r[1] - 0.1; a += 0.8) k.box([a - 0.04, a + 0.04, y0 + 0.03, y1 - 0.02, r[2] + 0.15, r[3] - 0.15]); }
+    else { k.box([r[0], r[0] + 0.15, y0, y1, r[2], r[3]]); k.box([r[1] - 0.15, r[1], y0, y1, r[2], r[3]]); for (a = r[2] + 0.4; a < r[3] - 0.1; a += 0.8) k.box([r[0] + 0.15, r[1] - 0.15, y0 + 0.03, y1 - 0.02, a - 0.04, a + 0.04]); } });
+  reg('vigas', bake(k), {add: 5, lag: 0.85, from: V3(0, 3, 0), part: 'viga'}); })();
+reg('losa', kitOf(C.LOSA.map(function(r){ return [r[0], r[1], LF - 0.25, LF, r[2], r[3]]; })), {add: 5, lag: 1.25, from: V3(0, 4, 0), part: 'losa'});
+
+/* ---------- step 6: first-floor walls, glazing, fireplaces ---------- */
+var WF = keep(wallPieces(C.FW, LF));
+reg('muro1', WF.solid, {add: 6, each: true, span: 1.0, from: V3(0, 4, 0), part: 'muro1'});
+reg('vent1', glassKit(C.FG.centro.concat(C.FG.ala), LF, FRAMES), {add: 6, lag: 1.25, from: V3(0, 0, -4), part: 'ventanal'});
+reg('ventanas1', WF.win, {add: 6, lag: 1.35, from: V3(0, 2, 0), part: 'ventana', noArrow: true});
+reg('chim', kitOf(C.CHIM.hogar), {add: 6, lag: 1.55, from: V3(0, 3, 0), part: 'chimenea'});
+
+/* ---------- step 7: deck boards, glass railings, both stairs ---------- */
+(function(){ var k = new Kit(); C.DECK.forEach(function(r){ k.box([r[0], r[1], LF - 0.05, LF, r[2], r[3]]); var alongX = (r[1] - r[0]) >= (r[3] - r[2]), a;
+    if (alongX) for (a = r[2] + 0.3; a < r[3] - 0.05; a += 0.3) k.seg([r[0], LF + 0.004, a], [r[1], LF + 0.004, a]);
+    else for (a = r[0] + 0.3; a < r[1] - 0.05; a += 0.3) k.seg([a, LF + 0.004, r[2]], [a, LF + 0.004, r[3]]); });
+  reg('tablas', bake(k, {lines: 0.3}), {add: 7, from: V3(0, 2.5, 0), part: 'tabla'}); })();
+(function(){ var k = new Kit(); C.RAILS.forEach(function(p){ var r = C.rail(p, LF); k.boxes(r.solid); k.boxes(r.glass, true); });
+  reg('barandas', bake(k, {glass: 0.22}), {add: 7, lag: 0.4, from: V3(0, 2, 0), part: 'baranda'}); })();
+(function(){ var k = new Kit(), b = LZ, i;   /* v1: two flights of 8 with a landing at 1.55 m, and the plaster wall between them */
+  for (i = 0; i < 8; i++){ var x0 = 8.4 + i * 0.25; k.box([x0, x0 + 0.25, b, b + (i + 1) * 1.5 / 8, 9.1, 10.12]); }
+  k.box([10.4, 11.1, 1.35, 1.55, 9.1, 11.3]);
+  for (i = 0; i < 8; i++){ var x1 = 10.4 - i * 0.25, t = 1.55 + (i + 1) * 1.45 / 8; k.box([x1 - 0.25, x1, t - 0.2, t, 10.2, 11.3]); }
+  k.box([8.4, 10.4, b, 1.45, 10.14, 10.2]);
+  reg('escInt', bake(k), {add: 7, lag: 0.8, from: V3(0, 3, 0), part: 'escInt'}); })();
+(function(){ var k = new Kit(), n = 17, z0 = 6.4, z1 = 2.0;   /* v1: 17 stone steps from the parking (y=3) down to the flat zone */
+  for (var i = 0; i < n; i++){ var zz0 = z0 - (i + 1) * (z0 - z1) / n, zz1 = z0 - i * (z0 - z1) / n; k.box([-11.0, -10.0, 0, Math.max(0.08, 3 - i * 3 / n), zz0, zz1]); }
+  reg('escExt', bake(k), {add: 7, lag: 1.0, from: V3(2.5, 0, 0), part: 'escExt'}); })();
+
+/* ---------- step 8: three gable roofs, gable ends, chimney stacks, the two eave posts ---------- */
+reg('postesAlero', kitOf(C.POSTS.alero.map(postBox)), {add: 8, from: V3(0, 3, 0), part: 'pilar'});
+var RQ = {};
+[['techoQ', 'quincho', 0.3], ['techoA', 'ala', 0.55], ['techoC', 'centro', 0.8]].forEach(function(t){ var k = new Kit(); RQ[t[1]] = gableInto(k, C.ROOF[t[1]]);
+  reg(t[0], bake(k, {lines: 0.3}), {add: 8, lag: t[2], from: V3(0, 5, 0), part: 'techo'}); });
+(function(){ var k = new Kit(), rc = C.ROOF.centro, ra = C.ROOF.ala, rq = C.ROOF.quincho, eM = rc[4], eW = ra[4];
+  var rM = RQ.centro.rise, rW = RQ.ala.rise, rQ = RQ.quincho.rise;
+  k.geo(prism([[-0.45, eM], [7.85, eM], [3.7, eM + rM - 0.05]], 'z', 12.035, 12.085));                    /* frontón de atrás, madera */
+  [7.4, 22.2].forEach(function(x){ k.geo(prism([[1.2, eW], [12.5, eW], [6.85, eW + rW - 0.05]], 'x', x - 0.025, x + 0.025)); });
+  [-7.38, 0].forEach(function(x){ k.geo(prism([[1.2, eW], [12.5, eW], [6.85, eW + rQ - 0.05]], 'x', x - 0.025, x + 0.025)); });
+  k.boxes(C.ROOF_BANDS);
+  k.geo(prism([[-0.45, eM], [7.85, eM], [3.7, eM + rM - 0.05]], 'z', -0.015, 0.015), true);             /* frontón vidriado del living */
+  reg('fronton', bake(k, {glass: 0.25}), {add: 8, lag: 1.1, from: V3(0, 3, 0), part: 'fronton'}); })();
+reg('canon', kitOf(C.CHIM.canon), {add: 8, lag: 1.3, from: V3(0, 3, 0), part: 'canon'});
+
+/* ---------- step 9: dark horizontal cladding (by side, sliding in from outside) and black window frames ---------- */
+function cladKit(list){ var k = new Kit().boxes(list);
+  list.forEach(function(b){ var alongX = (b[1] - b[0]) > (b[5] - b[4]); for (var y = b[2] + 0.3; y < b[3] - 0.05; y += 0.3){
+    if (alongX){ k.seg([b[0], y, b[4] - 0.004], [b[1], y, b[4] - 0.004]); k.seg([b[0], y, b[5] + 0.004], [b[1], y, b[5] + 0.004]); }
+    else { k.seg([b[0] - 0.004, y, b[4]], [b[0] - 0.004, y, b[5]]); k.seg([b[1] + 0.004, y, b[4]], [b[1] + 0.004, y, b[5]]); } } });
+  return bake(k, {lines: 0.4}); }
+[['revN', 'n', V3(0, 0, -3), 0], ['revS', 's', V3(0, 0, 3), 0.2], ['revE', 'e', V3(3, 0, 0), 0.4], ['revW', 'w', V3(-3, 0, 0), 0.6]].forEach(function(t){
+  reg(t[0], cladKit(CLAD[t[1]]), {add: 9, lag: t[3], from: t[2], part: 'revest'}); });
+reg('marcos', kitOf(FRAMES), {add: 9, lag: 0.95, from: V3(0, 0, -2), part: 'marco'});
+
+/* ---------- step 10: furniture (v1's blocks). One part per kind and floor, so the bubble can hide the upper floor ---------- */
+function furn(F, kinds){ var o = []; kinds.forEach(function(kd){
+    if (kd === 'sofa') F.sofa.forEach(function(s){ o = o.concat(sofaBoxes(s[0], s[1], s[2], s[3], F.b, s[4])); });
+    if (kd === 'bed') F.bed.forEach(function(s){ o = o.concat(bedBoxes(s[0], s[1], s[2], s[3], F.b, s[4])); });
+    if (kd === 'table') F.table.forEach(function(s){ o = o.concat(tableBoxes(s[0], s[1], s[2], s[3], F.b, s[4])); });
+    if (kd === 'chair') (F.chairs || []).forEach(function(c){ o.push(chairBox(c[0], c[1], F.b)); });
+    if (kd === 'cabinet') F.cabinet.forEach(function(s){ o.push([s[0], s[1], F.b, F.b + s[4], s[2], s[3]]); });
+    if (kd === 'rug') F.rug.forEach(function(s){ o.push([s[0], s[1], F.b, F.b + 0.012, s[2], s[3]]); });
+    if (kd === 'boxes') o = o.concat(F.boxes || []);
+    if (kd === 'fixture') F.fixture.forEach(function(s){ o.push([s[0], s[1], F.b, F.b + s[4], s[2], s[3]]); });
+    if (kd === 'kitchen'){ o = o.concat(F.kitchen, F.grill); F.stools.forEach(function(p){ o.push([p[0] - 0.18, p[0] + 0.18, F.b, F.b + 0.72, p[1] - 0.18, p[1] + 0.18]); }); } });
+  return kitOf(o); }
+var FZ = C.FURN.zc, FF = C.FURN.ff;
+[['sofa1', FF, ['sofa'], 'sofa', 0], ['sofaZ', FZ, ['sofa'], 'sofa', 0], ['mesa1', FF, ['table'], 'mesa', 0.2], ['mesaZ', FZ, ['table'], 'mesa', 0.2],
+ ['silla1', FF, ['chair'], 'silla', 0.4], ['cocina1', FF, ['kitchen'], 'cocina', 0.55], ['cama1', FF, ['bed'], 'cama', 0.7], ['camaZ', FZ, ['bed'], 'cama', 0.7],
+ ['mueble1', FF, ['cabinet', 'rug', 'boxes'], 'mueble', 0.85], ['muebleZ', FZ, ['cabinet', 'rug', 'boxes'], 'mueble', 0.85],
+ ['bano1', FF, ['fixture'], 'sanitario', 1.0], ['banoZ', FZ, ['fixture'], 'sanitario', 1.0]].forEach(function(t){
+  var lower = t[1] === FZ; reg(t[0], furn(t[1], t[2]), {add: 10, lag: t[4], from: V3(0, lower ? 1.2 : 2.5, 0), part: t[3], noArrow: lower, noGhost: lower}); });
+
+/* ---------- step 11: lawn, stone path, trees, rocks (keep it light) ---------- */
+(function(){ var k = new Kit(), r = 0.713, rnd = function(){ r = (r * 9301 + 0.4927) % 1; return r; };
+  C.LAWN.forEach(function(L){ k.box([L[0], L[1], 0, 0.03, L[2], L[3]]);
+    var n = Math.round((L[1] - L[0]) * (L[3] - L[2]) * 1.6);
+    for (var i = 0; i < n; i++){ var x = L[0] + 0.2 + rnd() * (L[1] - L[0] - 0.4), z = L[2] + 0.2 + rnd() * (L[3] - L[2] - 0.4);
+      if (x > C.PATH[0] - 0.2 && x < C.PATH[1] + 0.2 && z < C.PATH[3]) continue; k.seg([x, 0.03, z], [x - 0.07, 0.24, z]); k.seg([x, 0.03, z], [x + 0.08, 0.21, z]); } });
+  reg('pasto', bake(k, {lines: 0.45}), {add: 11, from: V3(0, 1.5, 0), part: 'pasto'}); })();
+(function(){ var g = new T.Group(); g.add(kitOf([[C.PATH[0], C.PATH[1], 0.03, 0.07, C.PATH[2], C.PATH[3]]]));
+  C.STONES.forEach(function(z){ var y = C.terrainH(-5.4, z); g.add(kitOf([[-6.0, -4.8, y - 0.3, y + 0.1, z - 0.4, z + 0.3]])); });
+  reg('camino', g, {add: 11, lag: 0.3, each: true, span: 0.5, from: V3(0, 2, 0), part: 'camino', noArrow: true}); })();
+(function(){ var g = new T.Group(); C.TREES.forEach(function(t){ g.add(at(P.arbol(t[2]), t[0], C.terrainH(t[0], t[1]) - 0.05, t[1])); });
+  reg('arboles', g, {add: 11, lag: 0.55, each: true, span: 0.7, grow: true, from: V3(0, 3, 0), part: 'arbol', noArrow: true}); })();
+(function(){ var g = new T.Group(); C.ROCKS.forEach(function(q){ g.add(at(P.roca(q[2]), q[0], C.terrainH(q[0], q[1]) + q[2] * 0.25, q[1])); });
+  reg('rocas', g, {add: 11, lag: 0.9, each: true, span: 0.4, from: V3(0, 2, 0), part: 'roca', noArrow: true}); })();
+/* ===================== end of PROJECT SCENE ===================== */
+
+var LAST = STEPS.length - 1;
+
+/* The scale figure BIG's axons always carry: an adult drawn to Le Corbusier's Modulor (crown 183 cm, navel 113, hanging wrist 86,
+   raised fingertips 226), one smooth front-view outline cut flat like a model's card figure, in one grey with no edges, darker than
+   the model's shade and lighter than its ink. Never build people from cylinders, boxes or spheres: they read as mannequins, not
+   people. The outline is in cm, x toward the hanging arm. */
+function modulorFigure(){
+  var NECK = [[5.4, 163], [5.6, 158.5], [6.2, 155.6], [8.4, 153.6], [13, 151.7], [19.6, 149.7], [20.6, 146], [19.2, 141], [17.4, 136]];
+  var SIDE = [[16.5, 130], [15.4, 122], [14.6, 113], [15.3, 105], [17, 98]];
+  var LEG = [[17.9, 90], [17.5, 80], [16.2, 69], [15, 60], [14.3, 54], [14.1, 49], [14.8, 41], [14.4, 33], [13.2, 24], [12.2, 16], [12.4, 11.5], [12.8, 8], [14.2, 5], [14.8, 2.4], [14.6, 0]];
+  var INSEAM = [[4, 0], [3.9, 2.4], [4.6, 5], [5.8, 8], [5.6, 12], [4.8, 21], [3.6, 30], [3.1, 37], [3.4, 44], [3.1, 50], [2.4, 57], [1.3, 67], [0.4, 77], [0, 84]];
+  var RAISED = [[-18, 137], [-20.4, 144], [-21.9, 150.5], [-22, 157], [-21.4, 165], [-20.4, 173], [-19.6, 181], [-19.1, 188], [-18.3, 196], [-17.2, 203], [-16.8, 207.5], [-17.3, 212], [-17.4, 218], [-16.6, 223], [-14.8, 225.6], [-12.8, 226], [-10.8, 225.6], [-9.1, 223], [-8.6, 218], [-8.8, 212], [-10.4, 207.5], [-11.2, 200], [-11.4, 191], [-11.6, 182], [-11.8, 174], [-12.2, 166], [-12.6, 158], [-12, 153.6], [-9.2, 153.6], [-6.2, 155.6], [-5.6, 158.5], [-5.4, 163]];
+  var HANGING = [[16.4, 146], [17.2, 139], [17.9, 132], [18.7, 125], [19.3, 118], [19.5, 111], [20.1, 102], [20.9, 93], [21.3, 86], [21.1, 80], [21.5, 74.5], [22.5, 70], [24, 68.4], [25.6, 69.6], [26.4, 74], [26.8, 80], [26.6, 86], [27.4, 95], [27.9, 104], [27.4, 112], [26.6, 118], [26.2, 124], [26.4, 131], [26.8, 137], [26.6, 142], [25.4, 146.5], [23.2, 149.2], [20.4, 150.2], [17.5, 149.5]];
+  var HEAD = [[0, 158.9], [2.6, 159.3], [4.6, 160.8], [6.2, 163.4], [7.3, 166.5], [7.8, 171], [7.5, 175], [6.6, 178.6], [4.8, 181.3], [2.5, 182.7], [0, 183]];
+  var mirror = function(run){ return run.map(function(p){ return [-p[0], p[1]]; }).reverse(); };
+  var ft = function(p){ return new T.Vector2(p[0] / U.cm, p[1] / U.cm); };
+  var outline = function(runs){ var s = new T.Shape(); s.moveTo(runs[0][0][0] / U.cm, runs[0][0][1] / U.cm);
+    runs.forEach(function(r, i){ if (i && s.currentPoint.distanceTo(ft(r[0])) > 1e-6) s.lineTo(r[0][0] / U.cm, r[0][1] / U.cm); s.splineThru(r.slice(1).map(ft)); });
+    return s; };
+  var shapes = [outline([NECK.concat(SIDE, LEG), INSEAM, mirror(INSEAM), mirror(LEG).concat(mirror(SIDE), RAISED)]), outline([HANGING]),
+    outline([HEAD.concat(mirror(HEAD).slice(1))])];
+  var m = new T.Mesh(new T.ShapeGeometry(shapes), new T.MeshBasicMaterial({color: 0x555555, side: T.DoubleSide}));
+  m.castShadow = true; m.userData.keepColor = true; return m;
+}
+/* the white model: everything that is not a registered part goes white, except the scale figure */
+if (CONFIG.figure){ (function(){ var fig = modulorFigure(); fig.rotation.y = CONFIG.figure[2] != null ? CONFIG.figure[2] : Math.atan2(VIEW.x, VIEW.z);
+  at(fig, CONFIG.figure[0], 0, CONFIG.figure[1]); world.add(fig); })(); }
+world.children.forEach(function(ch){ if (order.some(function(k){ return objs[k] === ch; })) return; if (!ch.userData.keepColor) paint(ch, WHITE); });
+
+/* bounds: shadow camera and plan inset fit the scene */
+(function(){ world.updateMatrixWorld(true); var bb = new T.Box3().setFromObject(world); var c = bb.getCenter(new T.Vector3()), s = bb.getSize(new T.Vector3()); var R = Math.max(s.x, s.y, s.z) * 0.75 + 1;
+  sun.position.set(c.x - 0.5 * R, c.y + R, c.z + 0.45 * R); sun.target.position.copy(c); var sc = sun.shadow.camera; sc.left = -R; sc.right = R; sc.top = R; sc.bottom = -R; sc.near = 0.1; sc.far = R * 4; sc.updateProjectionMatrix();
+  var pl = CONFIG.plan || {c: [c.x, c.z], r: Math.max(s.x, s.z) / 2 * 1.08}; planCam.left = -pl.r; planCam.right = pl.r; planCam.top = pl.r; planCam.bottom = -pl.r; planCam.far = bb.max.y + 200;
+  planCam.position.set(pl.c[0], bb.max.y + 50, pl.c[1]); planCam.lookAt(pl.c[0], 0, pl.c[1]); planCam.updateProjectionMatrix(); })();
+
+var THUMB = {};
+(function(){ var tc = document.createElement('canvas'); var tr = new T.WebGLRenderer({canvas: tc, antialias: true, alpha: true, preserveDrawingBuffer: true}); tr.setPixelRatio(2); tr.setSize(72, 72, false); tr.setClearColor(0xffffff, 0);
+  var sc = new T.Scene(); sc.add(new T.HemisphereLight(0xffffff, 0xffffff, 0.9)); var dl = new T.DirectionalLight(0xffffff, 0.16); dl.position.set(-6, 10, 6); sc.add(dl);
+  var cam = new T.OrthographicCamera(-1, 1, 1, -1, 0.01, 100); var tv = new T.Vector3().fromArray(CONFIG.view).normalize();
+  Object.keys(P).forEach(function(k){ var o = ((typeof THUMB_ONLY !== 'undefined' && THUMB_ONLY[k]) || P[k])(); paint(o, FILL); sc.add(o); o.updateMatrixWorld(true); var bb = new T.Box3().setFromObject(o); var c = bb.getCenter(new T.Vector3()); var r = bb.getSize(new T.Vector3()).length() / 2 * 1.02 + 0.02;
+    cam.position.copy(c).addScaledVector(tv, 20); cam.lookAt(c); cam.left = -r; cam.right = r; cam.top = r; cam.bottom = -r; cam.updateProjectionMatrix(); tr.render(sc, cam); THUMB[k] = tc.toDataURL('image/png'); sc.remove(o); });
+  tr.dispose(); if (tr.forceContextLoss) tr.forceContextLoss(); })();
+function partItem(key, qty, cls){ var li = document.createElement('li'); var q = /^\d+$/.test(qty) ? '×' + qty : qty;
+  if (cls === 'callout'){ li.innerHTML = '<div class="th"><img alt=""><span class="q"></span></div><span class="nm"></span>'; li.addEventListener('click', function(){ pulse(key); }); }
+  else { li.innerHTML = '<img alt=""><span class="q"></span><span class="nm"></span>'; }
+  li.querySelector('img').src = THUMB[key] || ''; li.querySelector('.q').textContent = q; li.querySelector('.nm').textContent = NAMES[key] || key; return li; }
+
+/* ---------- state and animation ---------- */
+var tweens = [];
+function ease(t){ return 1 - Math.pow(1 - t, 3); }
+function easeIO(t){ return t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2; }
+/* a tween's clock starts on its first rendered frame, so a slow first frame can't eat the opening motion */
+function tween(dur, fn, easing, delay){ var tw = {t0: null, d: reduce ? 0 : (delay || 0), dur: reduce ? 0 : dur, fn: fn, e: easing || ease}; tweens.push(tw); return tw; }
+function stepTweens(now){ for (var i = tweens.length - 1; i >= 0; i--){ var tw = tweens[i]; if (tw.t0 == null) tw.t0 = now + tw.d; if (now < tw.t0) continue; var k = tw.dur === 0 ? 1 : Math.min(1, (now - tw.t0) / tw.dur); tw.fn(tw.e(k), k); if (k >= 1) tweens.splice(i, 1); } }
+var temps = [];
+function clearTemps(){ temps.forEach(function(a){ world.remove(a); }); temps = []; }
+function accel(i, n, span){ return n <= 1 ? 0 : span * Math.sqrt(i / (n - 1)); }
+
+function visibleAt(obj, k, page){ var u = obj.userData; if (u.only) return u.only.indexOf(page) >= 0; return u.add <= k && (u.remove == null || k < u.remove); }
+function applyState(k, page){
+  order.forEach(function(key){ var o = objs[key]; var u = o.userData; o.visible = visibleAt(o, k, page); o.position.copy(u.dest); o.scale.setScalar(1); setOpacity(o, 1);
+    o.traverse(function(n){ if (n.isLineSegments && n.material.userData.inkBase) n.material.color.setHex(INK); });
+    if (u.each) o.children.forEach(function(ch){ if (ch.userData.dest) ch.position.copy(ch.userData.dest); ch.scale.setScalar(1); });
+    var hot = page === 0 || (u.only ? u.only.indexOf(page) >= 0 : (u.add === page || u.remove === page)); paint(o, hot ? FILL : GREY); });
+}
+function landing(o, from, dest, lag, dur){ o.visible = true; o.position.copy(from); setOpacity(o, 0); tween(180, function(e){ setOpacity(o, e); }, null, lag - 180); tween(dur || 700, function(e){ o.position.lerpVectors(from, dest, e); }, ease, lag); }
+function pulse(partKey){ /* tap a part in the callout: it blinks twice and its outline flashes the accent */
+  order.forEach(function(key){ var o = objs[key]; if (o.userData.part !== partKey || !o.visible) return; var b = o.userData.cutK || 1;
+    var inks = []; o.traverse(function(n){ if (n.isLineSegments && n.material.color && inks.indexOf(n.material) < 0){ n.material.userData.inkBase = true; inks.push(n.material); } });
+    tween(900, function(e, k){ setOpacity(o, b * (1 - 0.75 * Math.abs(Math.sin(k * Math.PI * 2)))); inks.forEach(function(m){ m.color.setHex(k < 1 ? ACCENT : INK); }); }, function(t){ return t; }); });
+}
+
+/* per-step view: the step's own keys override its CAM preset */
+function specOf(i){ var s = STEPS[i], p = CAM[s.cam] || {}; return {c: p.c, r: p.r, v: s.view || p.v || CONFIG.view, walls: s.walls !== undefined ? s.walls : p.walls, cut: s.cut || p.cut || []}; }
+var camT = {c: new T.Vector3(), r: 10};
+var scaleBar = $('#scaleBar'), scaleTxt = $('#scaleTxt');
+function frame(c, r){ camT.c.copy(c); camT.r = r; camera.position.copy(c).addScaledVector(VIEW, 120); camera.lookAt(c); var w = stage.clientWidth || 1, h = stage.clientHeight || 1, a = w / h;
+  if (a >= 1){ camera.top = r; camera.bottom = -r; camera.left = -r * a; camera.right = r * a; } else { camera.left = -r; camera.right = r; camera.top = r / a; camera.bottom = -r / a; } camera.updateProjectionMatrix();
+  var pxPerU = a >= 1 ? h / (2 * r) : w / (2 * r); var opts = U.bar; var pick = opts[opts.length - 1];
+  for (var i = 0; i < opts.length; i++){ if (opts[i][0] * pxPerU <= 110){ pick = opts[i]; break; } } scaleBar.style.width = (pick[0] * pxPerU).toFixed(1) + 'px'; scaleTxt.textContent = pick[1]; }
+function setWalls(spec){ WALLS.forEach(function(m){ var w = m.userData.wall; var t = 1;
+    if (spec && spec.h != null && (!spec.sides || spec.sides.indexOf(w.side) >= 0)) t = w.y0 >= spec.h ? 0 : (Math.min(w.y1, spec.h) - w.y0) / (w.y1 - w.y0);
+    var s0 = m.scale.y; if (Math.abs(t - s0) < 1e-3) return; m.visible = true; tween(900, function(e){ var s = s0 + (t - s0) * e; m.scale.y = Math.max(0.001, s); m.visible = s > 0.002; }, easeIO); }); }
+function moveCam(sp){ var c0 = camT.c.clone(), r0 = camT.r, c1 = v(sp.c), r1 = sp.r, v0 = VIEW.clone(), v1 = v(sp.v).normalize(); setWalls(sp.walls);
+  if (c0.distanceTo(c1) < 0.01 && Math.abs(r0 - r1) < 0.01 && v0.distanceTo(v1) < 0.001) return; tween(900, function(e){ VIEW.copy(v0).lerp(v1, e).normalize(); frame(c0.clone().lerp(c1, e), r0 + (r1 - r0) * e); }, easeIO); }
+var CUT_O = 0.12, cutNow = [];
+function setCut(keys){ order.forEach(function(key){ var o = objs[key]; var was = cutNow.indexOf(key) >= 0, is = keys.indexOf(key) >= 0; if (!was && !is) return; var a = was ? CUT_O : 1, b = is ? CUT_O : 1;
+    o.userData.cutK = b; setOpacity(o, a); tween(600, function(e){ setOpacity(o, a + (b - a) * e); o.traverse(function(n){ if (n.isMesh) n.material.depthWrite = !is || e < 0.5; }); }, easeIO); if (!is) o.userData.cutK = 1; }); cutNow = keys.slice(); }
+
+var planFrame = new T.LineLoop(new T.BufferGeometry().setFromPoints([new T.Vector3(-1, 0, -1), new T.Vector3(1, 0, -1), new T.Vector3(1, 0, 1), new T.Vector3(-1, 0, 1)]), new T.LineBasicMaterial({color: ACCENT})); planFrame.layers.set(1); scene.add(planFrame);
+var planEl = $('.plan');
+
+var bubble = $('#bubble'), bubbleIn = bubble.firstElementChild, leader = $('#leader'), ring = $('#ring');
+var detail = null, bubbleK = 0;
+function setDetail(spec, delay){ detail = null; bubble.classList.remove('on'); bubbleK = 0; if (!spec) return;
+  tween(1, function(){ detail = {p: v(spec.p), r: spec.r, hide: spec.hide || [], v: (spec.view || spec.v) ? v(spec.view || spec.v).normalize() : null}; bubble.classList.add('on'); }, null, delay);
+  tween(420, function(e){ bubbleK = e; bubbleIn.style.transform = 'scale(' + e.toFixed(3) + ')'; }, ease, delay); }
+
+var dimLayer = $('#dims'); var dimObjs = []; var labels = [];
+function clearDims(){ dimObjs.forEach(function(o){ world.remove(o); }); dimObjs = []; labels = []; dimLayer.innerHTML = ''; }
+function showLater(el, delay){ if (reduce) el.classList.add('on'); else setTimeout(function(){ el.classList.add('on'); }, delay); }
+function addDim(d, delay){ var A = v(d.a), B = v(d.b), O = v(d.off); var A2 = A.clone().add(O), B2 = B.clone().add(O); var ext = O.clone().normalize().multiplyScalar(0.18 * G); var dir = B2.clone().sub(A2).normalize(); var tick = new T.Vector3().crossVectors(dir, O.clone().normalize()); if (tick.length() < 0.01) tick.set(0, 1, 0); tick.normalize().multiplyScalar(0.12 * G);
+  var pts = [A.clone().add(O.clone().normalize().multiplyScalar(0.12 * G)), A2.clone().add(ext), B.clone().add(O.clone().normalize().multiplyScalar(0.12 * G)), B2.clone().add(ext), A2, B2, A2.clone().sub(tick), A2.clone().add(tick), B2.clone().sub(tick), B2.clone().add(tick)];
+  var l = lines(pts, INK, 0.8); l.material.opacity = 0; world.add(l); dimObjs.push(l); tween(300, function(e){ l.material.opacity = 0.8 * e; }, null, delay);
+  var el = document.createElement('div'); el.className = 'dim'; el.textContent = d.label; dimLayer.appendChild(el); labels.push({el: el, p: A2.clone().lerp(B2, 0.5), dy: -14}); showLater(el, delay); }
+function addNote(nt, delay){ var p = v(nt.p); var dot = new T.Mesh(new T.SphereGeometry(0.05 * G, 8, 6), new T.MeshBasicMaterial({color: INK, transparent: true, opacity: 0})); dot.position.copy(p); world.add(dot); dimObjs.push(dot); tween(300, function(e){ dot.material.opacity = e; }, null, delay);
+  var el = document.createElement('div'); el.className = 'note'; el.textContent = nt.text; dimLayer.appendChild(el); labels.push({el: el, p: p, dy: -18}); showLater(el, delay); }
+function addMark(n, p, off, delay){ var el = document.createElement('div'); el.className = 'mark'; el.textContent = n; off = off || [0, 0];
+  var ln = document.createElement('i'); el.appendChild(ln);   /* leader: sized each frame from the clamped mark position */
+  dimLayer.appendChild(el); labels.push({el: el, p: v(p), dx: off[0], dy: off[1], ln: ln}); showLater(el, delay); }
+var tmpV = new T.Vector3();
+function project(p, w, h){ tmpV.copy(p).applyMatrix4(world.matrixWorld).project(camera); return [(tmpV.x + 1) / 2 * w, (1 - tmpV.y) / 2 * h]; }
+var calloutEl = $('#callout'), partsEl = $('#parts');
+function partsCue(){ calloutEl.classList.toggle('more', partsEl.scrollWidth - partsEl.clientWidth - partsEl.scrollLeft > 2); }
+partsEl.addEventListener('scroll', partsCue, {passive: true});
+function placeLabels(w, h){ var top = calloutEl.hidden ? 4 : calloutEl.offsetTop + calloutEl.offsetHeight + 6; labels.forEach(function(L){ var s = project(L.p, w, h); var x = s[0] + (L.dx || 0), y = s[1] + L.dy; var ew = L.el.offsetWidth, eh = L.el.offsetHeight; x = Math.max(4 + ew / 2, Math.min(w - 4 - ew / 2, x)); y = Math.max(top + eh / 2, Math.min(h - 4 - eh / 2, y)); L.el.style.transform = 'translate(' + (x - ew / 2).toFixed(1) + 'px,' + (y - eh / 2).toFixed(1) + 'px)';
+    if (L.ln){ var ddx = s[0] - x, ddy = s[1] - y, len = Math.hypot(ddx, ddy); L.ln.style.display = len > 16 ? 'block' : 'none'; L.ln.style.width = Math.max(0, len - 14).toFixed(1) + 'px'; L.ln.style.transform = 'rotate(' + Math.atan2(ddy, ddx).toFixed(4) + 'rad) translateX(11px)'; } }); }
+
+var current = -1, rotUser = 0;
+var where = $('#where'), body = $('#body');
+function enter(i, replay){
+  var s = STEPS[i], sp = specOf(i); clearTemps(); clearDims(); tweens = []; setDetail(null);
+  var r0 = rotUser; if (Math.abs(r0) > 0.001) tween(700, function(e){ rotUser = r0 * (1 - e); });
+  var base = (i === 0 || i === LAST) ? LAST : i - 1;
+  applyState(base, i);
+  order.forEach(function(key){ var o = objs[key], u = o.userData; if (u.only && u.only.indexOf(i) < 0 && u.only.indexOf(i - 1) >= 0 && i !== 0){ o.visible = true; setOpacity(o, 1); (function(o2){ tween(260, function(e){ setOpacity(o2, 1 - e); if (e >= 1) o2.visible = false; }); })(o); } });
+  if (cutNow.length){ cutNow.forEach(function(k){ setOpacity(objs[k], CUT_O); }); } setCut(sp.cut);
+  moveCam(sp);
+  var lastLand = 350;
+  if (i > 0 && i < LAST){
+    order.forEach(function(key){ var o = objs[key], u = o.userData;
+      var arrives = u.only ? (u.only.indexOf(i) >= 0 && u.only.indexOf(i - 1) < 0) : u.add === i;
+      if (arrives){
+        var lag = 350 + u.lag * 1000; var from = u.dest.clone().add(u.from);
+        if (!u.noGhost && (!u.each || o.children.length <= 8)){ var gh = ghostOf(o); world.add(gh); temps.push(gh); (function(g2, l2, d2){ tween(d2, function(e){ setOpacity(g2, 1 - e); if (e >= 1) g2.visible = false; }, null, l2); })(gh, lag, u.each ? u.span * 1000 + 400 : 700); }
+        if (!u.noArrow){ var ar = arrow(from.clone().addScaledVector(u.from, -0.1), u.dest.clone().addScaledVector(u.from.clone().normalize(), 0.3 * G)); ar.visible = !reduce; world.add(ar); temps.push(ar); (function(ar2, l2){ tween(300, function(e){ setOpacity(ar2, 1 - e); if (e >= 1) ar2.visible = false; }, null, l2 + 650); })(ar, lag); }
+        if (u.each){ o.visible = true; o.position.copy(u.dest); var n = o.children.length; o.children.forEach(function(ch, j){ if (!ch.userData.dest) ch.userData.dest = ch.position.clone(); landing(ch, ch.userData.dest.clone().add(u.from), ch.userData.dest, lag + accel(j, n, u.span) * 1000, 520); }); lastLand = Math.max(lastLand, lag + u.span * 1000 + 520); }
+        else { landing(o, from, u.dest, lag); lastLand = Math.max(lastLand, lag + 700); }
+      } else if (u.remove === i){
+        o.visible = true; o.position.copy(u.dest); setOpacity(o, 1); var to = u.dest.clone().add(u.from); var lag2 = 350 + u.lag * 1000;
+        var ar3 = arrow(u.dest.clone().addScaledVector(u.from.clone().normalize(), 0.9 * G), to); ar3.visible = !reduce; world.add(ar3); temps.push(ar3);
+        (function(o2, to2, ar4, l3){ tween(700, function(e){ o2.position.lerpVectors(o2.userData.dest, to2, e); setOpacity(o2, 1 - e * 0.9); if (e >= 1) o2.visible = false; }, ease, l3); tween(300, function(e){ setOpacity(ar4, 1 - e); if (e >= 1) ar4.visible = false; }, null, l3 + 650); })(o, to, ar3, lag2);
+        lastLand = Math.max(lastLand, lag2 + 700);
+      }
+    });
+  }
+  if (i === LAST){ /* grow parts rise out of the model, slow first and then all at once */
+    order.forEach(function(key){ var o = objs[key], u = o.userData; if (!u.grow || !o.visible) return; var lag = 500 + u.lag * 1000, n = o.children.length;
+      o.children.forEach(function(ch, j){ ch.scale.setScalar(0.001); (function(c2, d){ tween(600, function(e){ c2.scale.setScalar(0.001 + 0.999 * e); }, ease, d); })(ch, lag + accel(j, n, u.span) * 1000); }); }); }
+  if (s.onEnter){ var r = s.onEnter({i: i, lastLand: lastLand, objs: objs, tween: tween, ease: ease, easeIO: easeIO, setOpacity: setOpacity, setColor: setColor, paint: paint, T: T, still: reduce}); if (typeof r === 'number') lastLand = r; }
+  (s.dims || []).forEach(function(d, j){ addDim(d, lastLand + 250 + j * 150); });
+  (s.notes || []).forEach(function(nt, j){ addNote(nt, lastLand + 250 + j * 150); });
+  (s.acts || []).forEach(function(a, j){ if (a[1]) addMark(j + 1, a[1], a[2], lastLand + 350 + j * 120); });
+  setDetail(s.detail, lastLand + 600);
+  var fill = function(){
+    $('#num').innerHTML = i === 0 ? '<small>Piezas</small>' : (i === LAST ? '<small>Lista</small>' : String(i));
+    $('#title').textContent = s.title; $('#text').textContent = s.text || ''; $('#meta').textContent = (s.time ? s.time + (s.meta ? ' · ' : '') : '') + (s.meta || ''); $('#tip').textContent = s.tip || '';
+    var acts = $('#acts'); acts.innerHTML = ''; (s.acts || []).forEach(function(a, j){ var li = document.createElement('li'); li.innerHTML = '<b></b><span></span>'; li.children[0].textContent = String(j + 1); li.children[1].textContent = a[0]; acts.appendChild(li); });
+    var extra = $('#extra'); extra.innerHTML = '';
+    if (s.inventory){ INVENTORY.forEach(function(gp){ var h = document.createElement('p'); h.className = 'grp'; h.textContent = gp[0]; extra.appendChild(h); var ul = document.createElement('ul'); ul.className = 'inv'; gp[1].forEach(function(p){ ul.appendChild(partItem(p[0], p[1], 'inv')); }); extra.appendChild(ul); }); }
+    if (s.calendar){ var cl = document.createElement('ul'); cl.className = 'cal'; s.calendar.forEach(function(p){ var li = document.createElement('li'); li.innerHTML = '<span class="d"></span><span></span>'; li.children[0].textContent = p[0]; li.children[1].textContent = p[1]; cl.appendChild(li); }); extra.appendChild(cl); }
+    $('#sheet').scrollTop = 0; body.style.opacity = 1;
+  };
+  if (reduce || current < 0 || replay){ fill(); } else { body.style.opacity = 0; setTimeout(fill, 150); }
+  var co = $('#callout'), pl = $('#parts'); pl.innerHTML = '';
+  if (s.parts && s.parts.length){ s.parts.forEach(function(p){ pl.appendChild(partItem(p[0], p[1], 'callout')); }); co.hidden = false; } else { co.hidden = true; } partsCue();
+  $('#replay').hidden = !(i > 0 && i < LAST);
+  $('#prev').disabled = i === 0; $('#next').textContent = i === LAST ? 'Volver a las piezas' : (i === 0 ? 'Empezar' : (i === LAST - 1 ? 'Terminar' : 'Siguiente'));
+  $('#bar').style.width = (i / LAST * 100) + '%';
+  Array.prototype.forEach.call($('#ticks').children, function(b, j){ b.classList.toggle('done', j < i); });
+  where.textContent = (CONFIG.date ? CONFIG.date + ' · ' : '') + (i === 0 ? 'piezas' : (i === LAST ? 'lista' : i + ' de ' + (LAST - 1)));
+  if (!replay){ try { localStorage.setItem(CONFIG.storageKey, String(i)); } catch (e) {} }
+  current = i;
+}
+(function(){ var t = $('#ticks'); for (var j = 0; j < LAST; j++) t.appendChild(document.createElement('b')); })();
+function go(d){ var n = current + d; if (n < 0) n = 0; if (n > LAST) n = 0; enter(n); }
+$('#prev').addEventListener('click', function(){ go(-1); });
+$('#next').addEventListener('click', function(){ go(1); });
+$('#replay').addEventListener('click', function(){ enter(current, true); });
+document.addEventListener('keydown', function(e){ if (e.key === 'ArrowRight' || e.key === ' '){ e.preventDefault(); go(1); } if (e.key === 'ArrowLeft'){ e.preventDefault(); go(-1); } if (e.key === 'r') enter(current, true); });
+(function(){ var t0 = null; var el = $('#sheet'); el.addEventListener('pointerdown', function(e){ t0 = {x: e.clientX, y: e.clientY, id: e.pointerId}; }, {passive: true});
+  el.addEventListener('pointerup', function(e){ if (!t0 || e.pointerId !== t0.id) return; var dx = e.clientX - t0.x, dy = e.clientY - t0.y; t0 = null; if (Math.abs(dx) > 60 && Math.abs(dy) < 40) go(dx < 0 ? 1 : -1); }, {passive: true});
+  el.addEventListener('pointercancel', function(){ t0 = null; }); })();
+
+var drag = null;
+canvas.addEventListener('pointerdown', function(e){ drag = {x: e.clientX, rot: rotUser}; canvas.setPointerCapture(e.pointerId); });
+canvas.addEventListener('pointermove', function(e){ if (!drag) return; rotUser = Math.max(-0.9, Math.min(0.9, drag.rot + (e.clientX - drag.x) * 0.006)); });
+canvas.addEventListener('pointerup', function(){ drag = null; }); canvas.addEventListener('pointercancel', function(){ drag = null; });
+
+function wake(){ if (navigator.wakeLock && navigator.wakeLock.request) navigator.wakeLock.request('screen').catch(function(){}); }
+document.addEventListener('pointerdown', wake, {once: true}); document.addEventListener('visibilitychange', function(){ if (!document.hidden) wake(); });
+
+function resize(){ var w = stage.clientWidth, h = stage.clientHeight; var ps = (h < 480 ? 84 : 104) + 'px'; planEl.style.width = ps; planEl.style.height = ps; renderer.setSize(w, h, false); frame(camT.c, camT.r); if (typeof partsCue === 'function') partsCue(); }
+new ResizeObserver(resize).observe(stage);
+var dTarget = new T.Vector3(), pivotV = new T.Vector3(), Y_AXIS = new T.Vector3(0, 1, 0);
+function loop(now){
+  stepTweens(now);
+  world.rotation.y = rotUser + (reduce ? 0 : 0.028 * Math.sin(now / 9000 * Math.PI * 2));
+  world.position.copy(camT.c).sub(pivotV.copy(camT.c).applyAxisAngle(Y_AXIS, world.rotation.y));   /* turn about the framed centre, not the world origin */
+  world.updateMatrixWorld();
+  planFrame.position.set(camT.c.x, planCam.position.y - 10, camT.c.z); planFrame.scale.set(camT.r * 0.8, 1, camT.r * 0.8);
+  var w = stage.clientWidth, h = stage.clientHeight;
+  renderer.shadowMap.needsUpdate = true;
+  renderer.setViewport(0, 0, w, h); renderer.setScissorTest(false); renderer.setClearColor(0xffffff, 1); renderer.render(scene, camera);
+  var PLAN_PX = planEl.clientWidth || 84; var px = w - PLAN_PX - 12, py = h - 52 - PLAN_PX;
+  renderer.setScissorTest(true); renderer.setViewport(px, py, PLAN_PX, PLAN_PX); renderer.setScissor(px, py, PLAN_PX, PLAN_PX); renderer.setClearColor(0xf7f6f2, 1); renderer.clear(); renderer.render(scene, planCam);
+  if (detail && bubbleK > 0.02){
+    var D = bubble.clientWidth, dsz = Math.max(2, D * bubbleK); var cx = w - 12 - D / 2, cyy = 12 + D / 2; var bx = cx - dsz / 2, by = cyy - dsz / 2;
+    dTarget.copy(detail.p).applyMatrix4(world.matrixWorld); detailCam.position.copy(dTarget).addScaledVector(detail.v || VIEW, 60); detailCam.lookAt(dTarget); var r = detail.r; detailCam.left = -r; detailCam.right = r; detailCam.top = r; detailCam.bottom = -r; detailCam.updateProjectionMatrix();
+    renderer.setViewport(bx, by, dsz, dsz); renderer.setScissor(bx, by, dsz, dsz); renderer.setClearColor(0xffffff, 1); renderer.clear(); var hid = detail.hide.filter(function(k){ return objs[k] && objs[k].visible; }); hid.forEach(function(k){ objs[k].visible = false; }); renderer.render(scene, detailCam); hid.forEach(function(k){ objs[k].visible = true; });
+    var s2 = project(detail.p, w, h); var ax = s2[0], ay = s2[1]; var bcx = cx, bcy = h - cyy; var ang = Math.atan2(ay - bcy, ax - bcx); var L = Math.hypot(ax - bcx, ay - bcy); var start = dsz / 2 + 1;
+    leader.style.transform = 'translate(' + (bcx + Math.cos(ang) * start).toFixed(1) + 'px,' + (bcy + Math.sin(ang) * start).toFixed(1) + 'px) rotate(' + ang.toFixed(4) + 'rad)'; leader.style.width = Math.max(0, L - start - 9).toFixed(1) + 'px'; leader.style.opacity = bubbleK;
+    ring.style.transform = 'translate(' + (ax - 9).toFixed(1) + 'px,' + (ay - 9).toFixed(1) + 'px)'; ring.style.opacity = bubbleK;
+  }
+  renderer.setScissorTest(false);
+  placeLabels(w, h);
+  requestAnimationFrame(loop);
+}
+
+var start = 0; try { start = Math.min(LAST, Math.max(0, parseInt(localStorage.getItem(CONFIG.storageKey) || '0', 10) || 0)); } catch (e) {}
+if (hm) start = Math.min(LAST, Math.max(0, parseInt(hm[1], 10)));
+var sp0 = specOf(start); VIEW.copy(v(sp0.v)).normalize(); resize(); frame(v(sp0.c), sp0.r); enter(start);
+requestAnimationFrame(loop);
+})();
+</script>

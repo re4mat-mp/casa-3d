@@ -1,0 +1,143 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Casa en 3D</title>
+<style>
+  :root{
+    --bg:#f4f1ec; --paper:#f6f4ef; --panel:rgba(255,255,255,.93); --ink:#1d1d1f; --muted:#6b6660;
+    --line:rgba(0,0,0,.09); --accent:#2f5d50; --accent-ink:#fff; --danger:#b3261e;
+  }
+  *{box-sizing:border-box}
+  html,body{margin:0;height:100%;overflow:hidden;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif}
+  canvas{display:block;touch-action:none;outline:none}
+  #panel{position:fixed;top:16px;left:16px;width:min(300px,calc(100vw - 32px));background:var(--panel);
+    backdrop-filter:blur(10px);-webkit-backdrop-filter:blur(10px);border:1px solid var(--line);border-radius:14px;
+    box-shadow:0 8px 28px rgba(0,0,0,.14);font-size:13px;z-index:5;max-height:calc(100vh - 32px);overflow:auto}
+  #panel .hd{display:flex;align-items:flex-start;justify-content:space-between;gap:8px;padding:12px 14px 10px}
+  #panel .hd b{font-size:15px;display:block}
+  #panel .hd small{color:var(--muted);display:block;margin-top:2px;line-height:1.35}
+  #collapse{border:0;background:transparent;font-size:18px;line-height:1;cursor:pointer;color:var(--muted);padding:2px 4px}
+  #panel .body{padding:0 14px 14px;display:flex;flex-direction:column;gap:12px}
+  #panel.min .body{display:none}
+  .seg{display:grid;grid-template-columns:1fr 1fr;background:#ece8e2;border-radius:10px;padding:3px;gap:3px}
+  .seg.four{grid-template-columns:repeat(4,1fr)}
+  .seg button{border:0;border-radius:8px;padding:8px 6px;background:transparent;font:inherit;font-weight:600;cursor:pointer;color:var(--ink)}
+  .seg.four button{padding:7px 2px;font-size:12px}
+  .seg button.on{background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.12)}
+  .seg.small{grid-template-columns:1fr 1fr;padding:2px;border-radius:8px}
+  .seg.small button{padding:4px 6px;font-size:12px;border-radius:6px}
+  .row{display:flex;gap:6px;flex-wrap:wrap}
+  .row button{flex:1;border:1px solid var(--line);background:#fff;border-radius:9px;padding:7px 8px;font:inherit;cursor:pointer;color:var(--ink)}
+  .row button:hover{background:#f7f5f2}
+  .field{display:flex;flex-direction:column;gap:5px;color:var(--muted);font-weight:500}
+  .field select{font:inherit;color:var(--ink);padding:7px 8px;border-radius:9px;border:1px solid var(--line);background:#fff}
+  .field .lbl{display:flex;justify-content:space-between}
+  .field .lbl span{color:var(--ink);font-variant-numeric:tabular-nums}
+  .inline{display:flex;align-items:center;justify-content:space-between;gap:10px;color:var(--muted);font-weight:500}
+  .inline .seg{flex:0 0 172px}
+  .seg button{white-space:nowrap}
+  input[type=range]{width:100%;accent-color:var(--accent)}
+  .toggles{display:flex;gap:12px;flex-wrap:wrap}
+  .toggles label{display:flex;align-items:center;gap:5px;cursor:pointer}
+  .toggles input{accent-color:var(--accent)}
+  .toggles.off{opacity:.45;pointer-events:none}
+  .note{color:var(--muted);font-size:11.5px;line-height:1.4;border-top:1px solid var(--line);padding-top:10px}
+  #planPick{display:none}
+  body.stage-plano #planPick, body.stage-lineas #planPick{display:flex}
+  #help{position:fixed;left:50%;bottom:16px;transform:translateX(-50%);background:rgba(29,29,31,.82);color:#fff;
+    padding:9px 14px;border-radius:999px;font-size:12.5px;max-width:calc(100vw - 32px);text-align:center;z-index:4;pointer-events:none}
+  #dpad{position:fixed;right:16px;bottom:64px;display:none;grid-template-columns:repeat(3,52px);grid-template-rows:repeat(2,52px);gap:6px;z-index:6}
+  #dpad button{border:0;border-radius:12px;background:rgba(255,255,255,.9);font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,.18);
+    touch-action:none;user-select:none;-webkit-user-select:none;color:var(--ink)}
+  #dpad button:active{background:#ddd}
+  #dpad .up{grid-column:2;grid-row:1}#dpad .left{grid-column:1;grid-row:2}#dpad .down{grid-column:2;grid-row:2}#dpad .right{grid-column:3;grid-row:2}
+  body.walk #dpad{display:grid}
+  #cross{position:fixed;left:50%;top:50%;width:6px;height:6px;margin:-3px 0 0 -3px;border-radius:50%;background:rgba(255,255,255,.85);
+    box-shadow:0 0 0 1px rgba(0,0,0,.35);display:none;z-index:3;pointer-events:none}
+  body.walk #cross{display:block}
+  /* loading screen */
+  #loading{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:var(--bg);z-index:20;transition:opacity .6s ease}
+  #loading.done{opacity:0;pointer-events:none}
+  #loading .card{width:min(360px,calc(100vw - 48px));display:flex;flex-direction:column;gap:12px}
+  #loading b{font-size:17px}
+  #loading .sub{color:var(--muted);font-size:13px;line-height:1.4}
+  #loadTxt{font-size:13.5px;color:var(--ink);font-variant-numeric:tabular-nums}
+  #bar{height:6px;background:#e4dfd7;border-radius:999px;overflow:hidden}
+  #bar i{display:block;height:100%;width:0;background:var(--accent);border-radius:999px;transition:width .25s ease}
+  /* stage crossfade */
+  #fade{position:fixed;inset:0;background:var(--paper);opacity:0;pointer-events:none;z-index:4;transition:opacity .35s ease}
+  #fade.on{opacity:1}
+  /* red notice when a builder module fails */
+  #notice{position:fixed;right:16px;top:16px;max-width:min(360px,calc(100vw - 32px));background:#fff;border:1px solid rgba(179,38,30,.35);
+    color:var(--danger);border-radius:10px;padding:8px 12px;font-size:12px;line-height:1.4;box-shadow:0 4px 16px rgba(0,0,0,.12);z-index:7;display:none}
+  #notice.on{display:block}
+  #stats{position:fixed;right:16px;bottom:16px;background:rgba(255,255,255,.9);border:1px solid var(--line);border-radius:8px;padding:6px 9px;
+    font:11px/1.35 ui-monospace,SFMono-Regular,Menlo,monospace;color:var(--muted);white-space:pre;z-index:5;display:none}
+  body.showstats #stats{display:block}
+  @media (max-width:560px){ #panel{top:10px;left:10px;width:calc(100vw - 20px);max-height:55vh} #help{bottom:10px;font-size:11.5px} #notice{top:auto;bottom:60px} }
+</style>
+<script type="importmap">
+{ "imports": {
+  "three":         "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.webgpu.js",
+  "three/webgpu":  "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.webgpu.js",
+  "three/tsl":     "https://cdn.jsdelivr.net/npm/three@0.186.1/build/three.tsl.js",
+  "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.186.1/examples/jsm/"
+} }
+</script>
+</head>
+<body class="stage-terminada">
+<div id="loading">
+  <div class="card">
+    <b>Casa en 3D</b>
+    <div class="sub">La primera vez tarda un poco: baja el cielo, las texturas de madera, piedra y pasto, y los muebles.</div>
+    <div id="loadTxt">Preparando…</div>
+    <div id="bar"><i></i></div>
+  </div>
+</div>
+<div id="fade"></div>
+<div id="notice"></div>
+<div id="panel">
+  <div class="hd">
+    <div><b>Casa · 3D realista</b><small>Hecha desde las plantas del arquitecto. Medidas del plano; interiores, terreno y jardín inventados.</small></div>
+    <button id="collapse" title="Ocultar">–</button>
+  </div>
+  <div class="body">
+    <div class="seg four" id="stages">
+      <button data-stage="plano">Plano</button><button data-stage="lineas">Líneas</button><button data-stage="maqueta">Maqueta</button><button data-stage="terminada" class="on">Terminada</button>
+    </div>
+    <div class="inline" id="planPick">Plano
+      <div class="seg small"><button id="pFF" class="on">Primer piso</button><button id="pZC">Zócalo</button></div>
+    </div>
+    <div class="seg"><button id="mOrbit" class="on">Vista aérea</button><button id="mWalk">Caminar</button></div>
+    <label class="field">Ir a…
+      <select id="goto"></select>
+    </label>
+    <div class="row"><button id="vGeneral">Vista general</button><button id="vPlanta">Ver como plano</button></div>
+    <div class="toggles" id="toggles">
+      <label><input type="checkbox" id="tRoof" checked> Techo</label>
+      <label><input type="checkbox" id="tFF" checked> Primer piso</label>
+      <label><input type="checkbox" id="tLabels" checked> Nombres</label>
+    </div>
+    <label class="field"><div class="lbl">Hora del día <span id="hourTxt">17:30</span></div>
+      <input type="range" id="hour" min="6.5" max="20" step="0.25" value="17.5">
+    </label>
+    <div class="inline">Calidad
+      <div class="seg small"><button id="qAlta" class="on">Alta</button><button id="qMedia">Media</button></div>
+    </div>
+    <div class="note">Tip: haz <b>doble clic</b> en cualquier piso o terraza para aparecer ahí caminando. Si se ve lento, usa calidad <b>Media</b>.</div>
+  </div>
+</div>
+<div id="help"></div>
+<div id="cross"></div>
+<div id="stats"></div>
+<div id="dpad">
+  <button class="up" data-k="up">▲</button><button class="left" data-k="left">◀</button>
+  <button class="down" data-k="down">▼</button><button class="right" data-k="right">▶</button>
+</div>
+<script type="module" src="./js/main.js"></script>
+</body>
+</html>

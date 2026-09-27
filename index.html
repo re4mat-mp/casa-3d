@@ -1,0 +1,64 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex">
+<title>La casa en 3D</title>
+<meta name="description" content="Recorrer la casa por dentro y por fuera, y ver cómo se construye paso a paso.">
+<meta property="og:title" content="La casa en 3D">
+<meta property="og:description" content="Recorrerla por dentro y por fuera, y ver cómo se construye paso a paso.">
+<meta property="og:image" content="https://re4mat-mp.github.io/casa-3d/portada.jpg">
+<meta property="og:image:width" content="1200">
+<meta property="og:image:height" content="567">
+<meta property="og:type" content="website">
+<style>
+  :root{--bg:#f4f1ec;--card:#fff;--ink:#1d1d1f;--muted:#6b6660;--line:rgba(0,0,0,.09);--accent:#2f5d50}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+  main{max-width:720px;margin:0 auto;padding:24px 16px 40px}
+  h1{font-size:28px;line-height:1.15;margin:4px 0 6px;letter-spacing:-.01em}
+  .lead{color:var(--muted);font-size:16px;line-height:1.45;margin:0 0 18px}
+  .hero{display:block;width:100%;height:auto;aspect-ratio:1200/567;object-fit:cover;border-radius:14px;
+    border:1px solid var(--line);background:#dcd6cc}
+  .go{display:grid;gap:12px;margin:18px 0 22px}
+  @media (min-width:560px){.go{grid-template-columns:1fr 1fr}}
+  a.btn{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:16px 18px;box-shadow:0 2px 10px rgba(0,0,0,.05);-webkit-tap-highlight-color:transparent}
+  a.btn b{display:block;font-size:19px;margin-bottom:4px}
+  a.btn span{display:block;color:var(--muted);font-size:14.5px;line-height:1.4}
+  a.btn.main{background:var(--accent);border-color:var(--accent);color:#fff}
+  a.btn.main span{color:rgba(255,255,255,.82)}
+  a.btn:active{transform:translateY(1px)}
+  .notes{font-size:14.5px;line-height:1.5;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+  .notes p{margin:0 0 8px}
+  .notes b{color:var(--ink);font-weight:600}
+</style>
+</head>
+<body>
+<main>
+  <h1>La casa en 3D</h1>
+  <p class="lead">Hecha a partir de los planos del arquitecto. Se puede recorrer por dentro y por fuera, y ver cómo se va levantando.</p>
+
+  <img class="hero" src="portada.jpg" alt="La casa vista desde arriba, al atardecer, entre los árboles">
+
+  <div class="go">
+    <a class="btn main" href="v2/">
+      <b>Ver la casa</b>
+      <span>Girarla, entrar y caminar por dentro. Se puede cambiar la hora del día.</span>
+    </a>
+    <a class="btn" href="obra/">
+      <b>Cómo se construye</b>
+      <span>11 pasos, del terreno al techo, con las medidas en metros.</span>
+    </a>
+  </div>
+
+  <div class="notes">
+    <p><b>La primera vez tarda en cargar</b> — hasta medio minuto, porque baja texturas y árboles. Después anda fluido.</p>
+    <p>Se ve mejor en computador; en el teléfono también funciona.</p>
+    <p>Algunas cosas no vienen en el plano y son supuestas: la altura de los pisos, la pendiente del techo, la escalera, los muebles y el terreno alrededor.</p>
+  </div>
+</main>
+</body>
+</html>
