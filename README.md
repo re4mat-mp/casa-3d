@@ -1,20 +1,23 @@
 # Two floor plans, one house you can walk through
 
-An experiment: I had two floor plans as images and wanted to see how far they could go in a browser.
+An experiment: I had two floor plans and a few still renders of the house, and wanted to see how close a browser
+could get to those renders in real time, with a house you can walk into.
 
 [![The house at golden hour, the camera circling the front while the sun goes down](media/casa.gif)](https://re4mat-mp.github.io/casa-3d/)
 
 **▶ [Open the house and walk around it](https://re4mat-mp.github.io/casa-3d/v2/)** · [the start page](https://re4mat-mp.github.io/casa-3d/) · [the build manual](https://re4mat-mp.github.io/casa-3d/obra/) · [the first draft](https://re4mat-mp.github.io/casa-3d/v1/)
 
-Two PNGs of floor plans, at 1:50, with their dimension lines. Every wall in the 3D model was read off them; everything
-the plans don't say (the height of the floors, the roof pitch, the stair, the furniture, the land around it) is
-invented and listed as invented. The result runs in the browser with no install: you can orbit it, double-click a
+It didn't start from zero. The plans came together with three photorealistic still renders of the house
+(not included here: they are someone else's work). Every wall in the 3D model was read off the two floor plans, at
+1:50, with their dimension lines; the look (dark wood, black roof, the lake, the stone walls, golden-hour light) was
+aimed at those renders. What neither of them says (the height of the floors, the roof pitch, the stair, the
+furniture) is invented and listed as invented. The result runs in the browser with no install: you can orbit it, double-click a
 floor and walk through the rooms, and drag the time of day to watch the light move. The pages are in Spanish.
 
 > **In three sentences.** A first draft measured the plans into one HTML file of plain geometry and walking physics;
 > the second version kept those coordinates as the contract and rebuilt everything around them. The house and the
 > landscape were built in parallel by two Claude Code agents, each owning one module, against a written
-> spec and a target look. Nothing counted as done until it had been rendered in headless Chrome and the pictures
+> spec whose target was the reference renders. Nothing counted as done until it had been rendered in headless Chrome and the pictures
 > looked right, because a 3D scene that "loads without errors" can still be a black screen.
 
 ## What's in it
@@ -30,10 +33,11 @@ floor and walk through the rooms, and drag the time of day to watch the light mo
 
 1. **Measure once, then never move a wall.** v1 turned the plans into coordinates (metres, x across the plan, z down
    it). v2 imports them unchanged; a self-test walks the house and checks the walls and floors (`?selftest`).
-2. **Write the guesses down.** Floor height 2.70 m, roof pitch, a U-shaped stair, footings, furniture, terrain, a
-   lake to the north. They are on the page, so nobody mistakes an invention for the plan.
-3. **A spec before the builders.** One file says what makes it look real (materials, light, railings, nature) as a
-   checklist, the coordinate system, and the contract each module exports. → `house.js`, `nature.js`
+2. **Write the guesses down.** Floor height 2.70 m, roof pitch, a U-shaped stair, footings, furniture, the exact
+   terrain. They are on the page, so nobody mistakes an invention for the plan.
+3. **A spec before the builders.** The three reference renders became one file that says what makes them look real
+   (materials, light, railings, nature) as a checklist, plus the coordinate system and the contract each module
+   exports. The builders compared their screenshots against the renders. → `house.js`, `nature.js`
 4. **Split by module, build in parallel.** One agent builds the house, another the landscape, the main session
    owns the engine (`main.js`) and `shared.js`. No two writers touch the same file.
 5. **Every view is a URL.** `?stage=` `?hour=` `?view=` `?webgl` `?q=media` `?cycle` `?stats`, so a headless browser
