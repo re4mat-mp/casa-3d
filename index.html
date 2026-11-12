@@ -1,0 +1,67 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="robots" content="noindex">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Two plans, one house</title>
+<meta name="description" content="An experiment: two floor plans turned into a house you can walk through in the browser.">
+<meta property="og:title" content="Two plans, one house">
+<meta property="og:description" content="Two floor plans turned into a house you can walk through in the browser.">
+<meta property="og:image" content="https://re4mat-mp.github.io/casa-3d/media/portada.jpg">
+<style>
+  :root{--bg:#f4f1ec;--card:#fff;--ink:#1d1d1f;--muted:#6b6660;--line:rgba(0,0,0,.09);--accent:#2f5d50}
+  @media (prefers-color-scheme:dark){:root{--bg:#171615;--card:#22201e;--ink:#eeeae4;--muted:#a39d95;--line:rgba(255,255,255,.1);--accent:#4f8f7c}}
+  *{box-sizing:border-box}
+  html,body{margin:0;background:var(--bg);color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Helvetica,Arial,sans-serif;-webkit-text-size-adjust:100%}
+  main{max-width:760px;margin:0 auto;padding:28px 16px 48px}
+  h1{font-size:30px;line-height:1.15;margin:0 0 6px;letter-spacing:-.01em}
+  .lead{color:var(--muted);font-size:16.5px;line-height:1.45;margin:0 0 18px}
+  .hero{display:block;border-radius:14px;overflow:hidden;border:1px solid var(--line);background:#2b2f2a}
+  .hero img{display:block;width:100%;height:auto;aspect-ratio:16/9;object-fit:cover}
+  .go{display:grid;gap:12px;margin:18px 0 26px}
+  @media (min-width:600px){.go{grid-template-columns:2fr 1fr 1fr}}
+  a.btn{display:block;text-decoration:none;color:inherit;background:var(--card);border:1px solid var(--line);
+    border-radius:14px;padding:14px 16px;-webkit-tap-highlight-color:transparent}
+  a.btn b{display:block;font-size:17px;margin-bottom:3px}
+  a.btn span{display:block;color:var(--muted);font-size:14px;line-height:1.4}
+  a.btn.main{background:var(--accent);border-color:var(--accent);color:#fff}
+  a.btn.main span{color:rgba(255,255,255,.85)}
+  h2{font-size:15px;text-transform:uppercase;letter-spacing:.06em;color:var(--muted);margin:0 0 10px;font-weight:600}
+  .plans{display:grid;gap:12px;margin-bottom:24px}
+  @media (min-width:600px){.plans{grid-template-columns:1fr 1fr}}
+  .plans a{display:block;background:#fff;border:1px solid var(--line);border-radius:10px;overflow:hidden}
+  .plans img{display:block;width:100%;height:auto}
+  .notes{font-size:14.5px;line-height:1.55;color:var(--muted);border-top:1px solid var(--line);padding-top:14px}
+  .notes p{margin:0 0 8px}
+  .notes a{color:inherit}
+</style>
+</head>
+<body>
+<main>
+  <h1>Two plans, one house</h1>
+  <p class="lead">An experiment: two floor plans as images, turned into a house you can orbit, walk through and watch at any hour of the day, right in the browser.</p>
+
+  <a class="hero" href="v2/" aria-label="Open the house in 3D"><img src="media/casa.gif" alt="The house at golden hour, the camera circling the front while the sun goes down" width="600" height="338"></a>
+
+  <div class="go">
+    <a class="btn main" href="v2/"><b>Walk the house</b><span>Orbit it, double-click a floor to walk in, drag the time of day.</span></a>
+    <a class="btn" href="obra/"><b>Build manual</b><span>11 steps, ground to roof.</span></a>
+    <a class="btn" href="v1/"><b>First draft</b><span>Where every wall was measured.</span></a>
+  </div>
+
+  <h2>Where it started</h2>
+  <div class="plans">
+    <a href="v2/assets/plano_primer_piso.png"><img src="media/plano_primer_piso.jpg" alt="Floor plan of the upper floor" loading="lazy"></a>
+    <a href="v2/assets/plano_zocalo.png"><img src="media/plano_zocalo.jpg" alt="Floor plan of the lower floor" loading="lazy"></a>
+  </div>
+
+  <div class="notes">
+    <p>The first load takes up to half a minute: it downloads textures, sky and trees. After that it runs smoothly. Best on a computer; it works on a phone too.</p>
+    <p>Not in the plans, so invented: floor heights, roof pitch, the stair, the furniture and the land around the house. The 3D pages are in Spanish.</p>
+    <p>How it was made: <a href="https://github.com/re4mat-mp/casa-3d">the repo and its README</a>.</p>
+  </div>
+</main>
+</body>
+</html>

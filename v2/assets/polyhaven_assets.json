@@ -1,0 +1,4255 @@
+{
+  "_meta": {
+    "generated": "2026-09-27T14:39:53Z",
+    "source": "Poly Haven public API (api.polyhaven.com) + CDN dl.polyhaven.org; all assets CC0",
+    "verification": {
+      "urls_checked": 260,
+      "all_200_with_acao_star": true,
+      "failures": [],
+      "content_length_mismatches_vs_api": [],
+      "method": "curl -sI on every URL in this file; status + content-length + access-control-allow-origin recorded per entry"
+    },
+    "gltf_loading": {
+      "relative_paths_work": false,
+      "finding": "Each .gltf references its .bin as \"<id>.bin\" and its images as \"textures/<file>\". On the CDN the .bin DOES resolve next to the .gltf (Models/gltf/1k/<id>/<id>.bin -> 200), but \"Models/gltf/1k/<id>/textures/<file>\" returns 404: textures live in Models/jpg/1k/<id>/<file>. So GLTFLoader needs a URL modifier (or remap via the include map).",
+      "url_modifier_rule": "url.replace(/\\/Models\\/gltf\\/1k\\/([^/]+)\\/textures\\//, \"/Models/jpg/1k/$1/\")",
+      "url_modifier_rule_verified_for_all_models": true,
+      "three_js_snippet": "const manager = new THREE.LoadingManager();\nmanager.setURLModifier(url => url.replace(/\\/Models\\/gltf\\/1k\\/([^/]+)\\/textures\\//, '/Models/jpg/1k/$1/'));\nconst loader = new GLTFLoader(manager);\nloader.load(entry.gltf, gltf => scene.add(gltf.scene));",
+      "alternative": "Or use each entry's \"include\" map: setURLModifier(url => includeByBasename[url.split(\"/\").pop()]?.url ?? url).",
+      "axis_and_units": "glTF 2.0, Y-up, meters (Blender glTF exporter, +Y up). dims_m below are measured from the glTF accessors in glTF space [x, y(up), z]; info_dims_m_blender_xyz is the API value in Blender order [x, y, z(up)] - they match with y/z swapped.",
+      "foliage_alpha_gotcha": "All foliage materials (tree twigs, fern, shrub, grass, potted-plant leaves) use a 3-channel JPG as baseColor, so the glTF alphaMode MASK/BLEND has no alpha to cut with and leaf cards render as opaque rectangles (fir_sapling twigs are even exported OPAQUE). Fix per entry.alpha_fix: load alphaMap (grayscale JPG; three.js reads G) and set material.alphaMap = tex; material.alphaTest = 0.5; material.transparent = false; material.side = THREE.DoubleSide.",
+      "include_bin_note": "The API include map points the .bin at the 4k/8k folder; the identically sized copy next to the 1k .gltf also resolves, so the default relative .bin path is fine.",
+      "browser_test": "2026-09-27: loaded 22 of 27 models (all except fir_sapling, fir_sapling_medium, fir_tree_01, pine_sapling_medium, pine_tree_01 - skipped for size) with three.js r170 GLTFLoader + the url_modifier_rule from a cross-origin page (https://api.polyhaven.com): 22/22 OK, 0 loader errors, every texture decoded, Box3 sizes identical to dims_m. Without the modifier the texture URL returns 404."
+    },
+    "textures_note": "maps are 1k JPG unless res says 2k. \"arm\" packs AO(R) / Roughness(G) / Metalness(B) - exactly the channels three.js reads for aoMap/roughnessMap/metalnessMap, so diff + nor_gl + arm is enough (bytes_min); \"rough\" is listed as requested. Set colorSpace=SRGBColorSpace on diff only. Repeat = surface_size_m / size_m. aoMap needs uv (r152+ uses uv channel 0 by default via aoMap.channel).",
+    "hdri_note": "Load with RGBELoader (or HDRLoader in r180+), set texture.mapping = EquirectangularReflectionMapping, use as scene.background and scene.environment (PMREM is automatic for environment). Pure-sky HDRIs have no ground: the lower half is a flat horizon haze, so place your own ground/lake plane."
+  },
+  "hdris": [
+    {
+      "id": "kloofendal_48d_partly_cloudy_puresky",
+      "purpose": "day: bright partly-cloudy midday, blue sky + cumulus, strong sun (EV cap 21) -> crisp shadows; no buildings/ground (pure sky, lower hemisphere is flat haze)",
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloofendal_48d_partly_cloudy_puresky_2k.hdr",
+      "bytes": 5451493,
+      "evs_cap": 21,
+      "whitebalance_K": 5400,
+      "time_of_day": "midday",
+      "http": {
+        "status": 200,
+        "content_length": 5451493,
+        "acao": "*"
+      }
+    },
+    {
+      "id": "table_mountain_2_puresky",
+      "purpose": "late afternoon: warm low sun with clouds, strong sun (EV cap 21) -> long warm shadows; pure sky",
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/table_mountain_2_puresky_2k.hdr",
+      "bytes": 5162594,
+      "evs_cap": 21,
+      "whitebalance_K": 5400,
+      "time_of_day": "sunset",
+      "http": {
+        "status": 200,
+        "content_length": 5162594,
+        "acao": "*"
+      }
+    },
+    {
+      "id": "kloppenheim_06_puresky",
+      "purpose": "sunset (alt): soft golden sunset, low-contrast (EV cap 12) -> soft/weak sun shadows, use with an added DirectionalLight; pure sky",
+      "url": "https://dl.polyhaven.org/file/ph-assets/HDRIs/hdr/2k/kloppenheim_06_puresky_2k.hdr",
+      "bytes": 4434394,
+      "evs_cap": 12,
+      "whitebalance_K": 5319,
+      "time_of_day": "sunset",
+      "http": {
+        "status": 200,
+        "content_length": 4434394,
+        "acao": "*"
+      }
+    }
+  ],
+  "textures": {
+    "cladding": {
+      "id": "black_painted_planks",
+      "res": "2k",
+      "size_m": [
+        1.6,
+        1.6
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_painted_planks/black_painted_planks_diff_2k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_painted_planks/black_painted_planks_nor_gl_2k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_painted_planks/black_painted_planks_rough_2k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/black_painted_planks/black_painted_planks_arm_2k.jpg"
+      },
+      "map_bytes": {
+        "diff": 2463246,
+        "nor_gl": 3130670,
+        "rough": 1427818,
+        "arm": 2134641
+      },
+      "bytes": 9156375,
+      "bytes_min": 7728557,
+      "note": "black painted vertical boards (~14.5 cm boards; grain runs along V). 2k because it is the dominant exterior surface.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 2463246,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 3130670,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 1427818,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 2134641,
+          "acao": "*"
+        }
+      }
+    },
+    "cladding_alt": {
+      "id": "synthetic_wood",
+      "res": "2k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/synthetic_wood/synthetic_wood_diff_2k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/synthetic_wood/synthetic_wood_nor_gl_2k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/synthetic_wood/synthetic_wood_rough_2k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/2k/synthetic_wood/synthetic_wood_arm_2k.jpg"
+      },
+      "map_bytes": {
+        "diff": 2653555,
+        "nor_gl": 2760146,
+        "rough": 1165250,
+        "arm": 2555621
+      },
+      "bytes": 9134572,
+      "bytes_min": 7969322,
+      "note": "alt: clean narrow vertical brown boards with sharp grooves (Wood-Look Cladding); tint darker via material.color for a modern stained look.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 2653555,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 2760146,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 1165250,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 2555621,
+          "acao": "*"
+        }
+      }
+    },
+    "oak_floor": {
+      "id": "laminate_floor_02",
+      "res": "1k",
+      "size_m": [
+        1.7,
+        1.7
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor_02/laminate_floor_02_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor_02/laminate_floor_02_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor_02/laminate_floor_02_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor_02/laminate_floor_02_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 721641,
+        "nor_gl": 515725,
+        "rough": 560815,
+        "arm": 595827
+      },
+      "bytes": 2394008,
+      "bytes_min": 1833193,
+      "note": "light pale-oak wide planks, satin; planks run along U.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 721641,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 515725,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 560815,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 595827,
+          "acao": "*"
+        }
+      }
+    },
+    "oak_floor_alt": {
+      "id": "laminate_floor",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor/laminate_floor_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor/laminate_floor_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor/laminate_floor_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/laminate_floor/laminate_floor_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 525944,
+        "nor_gl": 365334,
+        "rough": 504864,
+        "arm": 454932
+      },
+      "bytes": 1851074,
+      "bytes_min": 1346210,
+      "note": "alt: light oak planks with light wear.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 525944,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 365334,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 504864,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 454932,
+          "acao": "*"
+        }
+      }
+    },
+    "deck": {
+      "id": "wooden_planks",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wooden_planks/wooden_planks_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wooden_planks/wooden_planks_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wooden_planks/wooden_planks_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/wooden_planks/wooden_planks_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 489587,
+        "nor_gl": 705118,
+        "rough": 233217,
+        "arm": 468546
+      },
+      "bytes": 1896468,
+      "bytes_min": 1663251,
+      "note": "brown exterior deck boards with gaps, boards run along U.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 489587,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 705118,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 233217,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 468546,
+          "acao": "*"
+        }
+      }
+    },
+    "deck_alt": {
+      "id": "weathered_brown_planks",
+      "res": "1k",
+      "size_m": [
+        1.8,
+        1.8
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_brown_planks/weathered_brown_planks_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_brown_planks/weathered_brown_planks_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_brown_planks/weathered_brown_planks_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/weathered_brown_planks/weathered_brown_planks_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 226049,
+        "nor_gl": 223250,
+        "rough": 234672,
+        "arm": 204214
+      },
+      "bytes": 888185,
+      "bytes_min": 653513,
+      "note": "alt: greyer, weathered/painted deck planks.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 226049,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 223250,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 234672,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 204214,
+          "acao": "*"
+        }
+      }
+    },
+    "metal_roof": {
+      "id": "corrugated_iron_02",
+      "res": "1k",
+      "size_m": [
+        2.7,
+        2.7
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/corrugated_iron_02/corrugated_iron_02_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 568492,
+        "nor_gl": 489773,
+        "rough": 793854,
+        "arm": 904443
+      },
+      "bytes": 2756562,
+      "bytes_min": 1962708,
+      "note": "neutral grey galvanized corrugated sheet, ribs along V. No standing-seam texture exists on Poly Haven; tint to black with material.color ~0x1a1a1a and keep nor_gl/arm.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 568492,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 489773,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 793854,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 904443,
+          "acao": "*"
+        }
+      }
+    },
+    "metal_roof_alt": {
+      "id": "box_profile_metal_sheet",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/box_profile_metal_sheet/box_profile_metal_sheet_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/box_profile_metal_sheet/box_profile_metal_sheet_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/box_profile_metal_sheet/box_profile_metal_sheet_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/box_profile_metal_sheet/box_profile_metal_sheet_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 346711,
+        "nor_gl": 550993,
+        "rough": 598232,
+        "arm": 667506
+      },
+      "bytes": 2163442,
+      "bytes_min": 1565210,
+      "note": "alt: box/trapezoid profile (flat pans + ribs, closest to standing seam) but RED diffuse -> skip diff, use nor_gl + arm with a flat near-black color.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 346711,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 550993,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 598232,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 667506,
+          "acao": "*"
+        }
+      }
+    },
+    "stone_wall": {
+      "id": "broken_wall",
+      "res": "1k",
+      "size_m": [
+        3.0,
+        3.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/broken_wall/broken_wall_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/broken_wall/broken_wall_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/broken_wall/broken_wall_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/broken_wall/broken_wall_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 650170,
+        "nor_gl": 1045384,
+        "rough": 321771,
+        "arm": 196416
+      },
+      "bytes": 2213741,
+      "bytes_min": 1891970,
+      "note": "dry-stacked grey stone, cool greys, no visible mortar (3 m tile).",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 650170,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 1045384,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 321771,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 196416,
+          "acao": "*"
+        }
+      }
+    },
+    "stone_wall_alt": {
+      "id": "stone_wall",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_wall/stone_wall_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_wall/stone_wall_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_wall/stone_wall_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/stone_wall/stone_wall_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 836975,
+        "nor_gl": 1172420,
+        "rough": 301003,
+        "arm": 586703
+      },
+      "bytes": 2897101,
+      "bytes_min": 2596098,
+      "note": "alt: warmer beige stacked rubble with dry mortar.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 836975,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 1172420,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 301003,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 586703,
+          "acao": "*"
+        }
+      }
+    },
+    "concrete_floor": {
+      "id": "concrete_floor_worn_001",
+      "res": "1k",
+      "size_m": [
+        3.0,
+        3.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/concrete_floor_worn_001/concrete_floor_worn_001_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 118806,
+        "nor_gl": 110906,
+        "rough": 181942,
+        "arm": 152919
+      },
+      "bytes": 564573,
+      "bytes_min": 382631,
+      "note": "smooth grey slab, fine scratches (3 m tile).",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 118806,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 110906,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 181942,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 152919,
+          "acao": "*"
+        }
+      }
+    },
+    "plaster_white": {
+      "id": "painted_plaster_wall",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/painted_plaster_wall/painted_plaster_wall_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 686726,
+        "nor_gl": 900461,
+        "rough": 354762,
+        "arm": 511105
+      },
+      "bytes": 2453054,
+      "bytes_min": 2098292,
+      "note": "lightest plaster on PH (diff mean ~ #aba3a0). For pure white set material.color > 1 (e.g. 1.35) or drop diff and keep nor_gl/rough. Note: \"white_plaster_02\" is actually dirty beige-grey.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 686726,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 900461,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 354762,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 511105,
+          "acao": "*"
+        }
+      }
+    },
+    "grass_lawn": {
+      "id": "leafy_grass",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/leafy_grass/leafy_grass_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/leafy_grass/leafy_grass_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/leafy_grass/leafy_grass_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/leafy_grass/leafy_grass_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 1195394,
+        "nor_gl": 1466049,
+        "rough": 511385,
+        "arm": 1010081
+      },
+      "bytes": 4182909,
+      "bytes_min": 3671524,
+      "note": "green trampled grass with some leaves; PH has no manicured-lawn texture, this is the greenest tileable one.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 1195394,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 1466049,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 511385,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 1010081,
+          "acao": "*"
+        }
+      }
+    },
+    "forest_floor": {
+      "id": "forrest_ground_03",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forrest_ground_03/forrest_ground_03_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forrest_ground_03/forrest_ground_03_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forrest_ground_03/forrest_ground_03_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/forrest_ground_03/forrest_ground_03_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 821191,
+        "nor_gl": 1587102,
+        "rough": 418230,
+        "arm": 272025
+      },
+      "bytes": 3098548,
+      "bytes_min": 2680318,
+      "note": "pine-needle litter + soil, fits under conifers / slopes.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 821191,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 1587102,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 418230,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 272025,
+          "acao": "*"
+        }
+      }
+    },
+    "dry_grass": {
+      "id": "withered_grass",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/withered_grass/withered_grass_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/withered_grass/withered_grass_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/withered_grass/withered_grass_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/withered_grass/withered_grass_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 1138384,
+        "nor_gl": 1472149,
+        "rough": 824502,
+        "arm": 1109845
+      },
+      "bytes": 4544880,
+      "bytes_min": 3720378,
+      "note": "sun-bleached dry grass for slopes.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 1138384,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 1472149,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 824502,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 1109845,
+          "acao": "*"
+        }
+      }
+    },
+    "gravel": {
+      "id": "gravel_floor_02",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravel_floor_02/gravel_floor_02_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravel_floor_02/gravel_floor_02_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravel_floor_02/gravel_floor_02_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/gravel_floor_02/gravel_floor_02_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 1240441,
+        "nor_gl": 1545680,
+        "rough": 680926,
+        "arm": 1103127
+      },
+      "bytes": 4570174,
+      "bytes_min": 3889248,
+      "note": "light grey driveway gravel for parking.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 1240441,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 1545680,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 680926,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 1103127,
+          "acao": "*"
+        }
+      }
+    },
+    "rock": {
+      "id": "mossy_rock",
+      "res": "1k",
+      "size_m": [
+        3.0,
+        3.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_rock/mossy_rock_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_rock/mossy_rock_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_rock/mossy_rock_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/mossy_rock/mossy_rock_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 1124438,
+        "nor_gl": 995727,
+        "rough": 780918,
+        "arm": 926941
+      },
+      "bytes": 3828024,
+      "bytes_min": 3047106,
+      "note": "grey striated rock with lichen/moss patches (3 m tile) for procedural boulders.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 1124438,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 995727,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 780918,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 926941,
+          "acao": "*"
+        }
+      }
+    },
+    "rock_alt": {
+      "id": "seaside_rock",
+      "res": "1k",
+      "size_m": [
+        2.0,
+        2.0
+      ],
+      "maps": {
+        "diff": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/seaside_rock/seaside_rock_diff_1k.jpg",
+        "nor_gl": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/seaside_rock/seaside_rock_nor_gl_1k.jpg",
+        "rough": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/seaside_rock/seaside_rock_rough_1k.jpg",
+        "arm": "https://dl.polyhaven.org/file/ph-assets/Textures/jpg/1k/seaside_rock/seaside_rock_arm_1k.jpg"
+      },
+      "map_bytes": {
+        "diff": 954872,
+        "nor_gl": 1158486,
+        "rough": 379230,
+        "arm": 640203
+      },
+      "bytes": 3132791,
+      "bytes_min": 2753561,
+      "note": "alt: plain dark-grey rock, no moss.",
+      "http": {
+        "diff": {
+          "status": 200,
+          "content_length": 954872,
+          "acao": "*"
+        },
+        "nor_gl": {
+          "status": 200,
+          "content_length": 1158486,
+          "acao": "*"
+        },
+        "rough": {
+          "status": 200,
+          "content_length": 379230,
+          "acao": "*"
+        },
+        "arm": {
+          "status": 200,
+          "content_length": 640203,
+          "acao": "*"
+        }
+      }
+    }
+  },
+  "models": {
+    "trees": [
+      {
+        "id": "pine_sapling_small",
+        "note": "lightest conifer on PH; several small pine saplings (~1.3 m) in one file",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/pine_sapling_small/pine_sapling_small_1k.gltf",
+        "gltf_bytes": 11442,
+        "include": {
+          "textures/pine_sapling_small_twig_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_small/pine_sapling_small_twig_arm_1k.jpg",
+            "bytes": 394056,
+            "http": 200,
+            "content_length": 394056
+          },
+          "textures/pine_sapling_small_twig_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_small/pine_sapling_small_twig_diff_1k.jpg",
+            "bytes": 477942,
+            "http": 200,
+            "content_length": 477942
+          },
+          "textures/pine_sapling_small_bark_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_small/pine_sapling_small_bark_nor_gl_1k.jpg",
+            "bytes": 1016849,
+            "http": 200,
+            "content_length": 1016849
+          },
+          "pine_sapling_small.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/pine_sapling_small/pine_sapling_small.bin",
+            "bytes": 17771796,
+            "http": 200,
+            "content_length": 17771796
+          },
+          "textures/pine_sapling_small_bark_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_small/pine_sapling_small_bark_diff_1k.jpg",
+            "bytes": 725265,
+            "http": 200,
+            "content_length": 725265
+          },
+          "textures/pine_sapling_small_bark_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_small/pine_sapling_small_bark_arm_1k.jpg",
+            "bytes": 801278,
+            "http": 200,
+            "content_length": 801278
+          },
+          "textures/pine_sapling_small_twig_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_small/pine_sapling_small_twig_nor_gl_1k.jpg",
+            "bytes": 692711,
+            "http": 200,
+            "content_length": 692711
+          }
+        },
+        "total_bytes": 21891339,
+        "total_mb": 21.89,
+        "over_15mb": true,
+        "dims_m": [
+          2.642,
+          1.299,
+          0.77
+        ],
+        "bbox_m": {
+          "min": [
+            -0.36,
+            -0.015,
+            -0.371
+          ],
+          "max": [
+            2.282,
+            1.283,
+            0.399
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          2.642,
+          0.77,
+          1.299
+        ],
+        "polycount": 398144,
+        "top_level_nodes": [
+          {
+            "node": "pine_sapling_small_b",
+            "size_m": [
+              0.529,
+              1.046,
+              0.73
+            ],
+            "min_y": 0.001,
+            "center_xz": [
+              0.999,
+              0.034
+            ]
+          },
+          {
+            "node": "pine_sapling_small_a",
+            "size_m": [
+              0.788,
+              1.299,
+              0.727
+            ],
+            "min_y": -0.015,
+            "center_xz": [
+              0.034,
+              -0.008
+            ]
+          },
+          {
+            "node": "pine_sapling_small_c",
+            "size_m": [
+              0.513,
+              0.961,
+              0.58
+            ],
+            "min_y": 0.001,
+            "center_xz": [
+              2.025,
+              -0.031
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "pine_sapling_small_bark",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_sapling_small_twig",
+            "alphaMode": "MASK",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "pine_sapling_small_twig",
+            "gltf_alphaMode": "MASK",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_small/pine_sapling_small_twig_alpha_1k.jpg",
+            "bytes": 103504
+          }
+        ],
+        "total_bytes_with_alpha_maps": 21994843,
+        "extensions_used": [
+          "KHR_materials_specular",
+          "KHR_materials_ior"
+        ],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 11442,
+        "flag": "HEAVY: 21.89 MB, 398,144 polys - not realistic for real-time web as-is; decimate + meshopt and self-host, or use as a hero close-up only"
+      },
+      {
+        "id": "fir_sapling",
+        "note": "three small fir saplings (~1.3 m)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fir_sapling/fir_sapling_1k.gltf",
+        "gltf_bytes": 10979,
+        "include": {
+          "textures/fir_sapling_twigs_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling/fir_sapling_twigs_nor_gl_1k.jpg",
+            "bytes": 474717,
+            "http": 200,
+            "content_length": 474717
+          },
+          "textures/fir_sapling_branches_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling/fir_sapling_branches_diff_1k.jpg",
+            "bytes": 776633,
+            "http": 200,
+            "content_length": 776633
+          },
+          "textures/fir_sapling_twigs_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling/fir_sapling_twigs_diff_1k.jpg",
+            "bytes": 252678,
+            "http": 200,
+            "content_length": 252678
+          },
+          "textures/fir_sapling_branches_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling/fir_sapling_branches_nor_gl_1k.jpg",
+            "bytes": 1137599,
+            "http": 200,
+            "content_length": 1137599
+          },
+          "textures/fir_sapling_twigs_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling/fir_sapling_twigs_arm_1k.jpg",
+            "bytes": 300249,
+            "http": 200,
+            "content_length": 300249
+          },
+          "textures/fir_sapling_branches_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling/fir_sapling_branches_arm_1k.jpg",
+            "bytes": 793567,
+            "http": 200,
+            "content_length": 793567
+          },
+          "fir_sapling.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/fir_sapling/fir_sapling.bin",
+            "bytes": 21677180,
+            "http": 200,
+            "content_length": 21677180
+          }
+        },
+        "total_bytes": 25423602,
+        "total_mb": 25.42,
+        "over_15mb": true,
+        "dims_m": [
+          2.743,
+          1.301,
+          0.826
+        ],
+        "bbox_m": {
+          "min": [
+            -0.437,
+            -0.008,
+            -0.43
+          ],
+          "max": [
+            2.306,
+            1.293,
+            0.396
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          2.743,
+          0.826,
+          1.301
+        ],
+        "polycount": 433021,
+        "top_level_nodes": [
+          {
+            "node": "fir_sapling_a",
+            "size_m": [
+              0.861,
+              1.301,
+              0.822
+            ],
+            "min_y": -0.008,
+            "center_xz": [
+              -0.006,
+              -0.015
+            ]
+          },
+          {
+            "node": "fir_sapling_b",
+            "size_m": [
+              0.64,
+              0.952,
+              0.818
+            ],
+            "min_y": -0.0,
+            "center_xz": [
+              0.994,
+              -0.022
+            ]
+          },
+          {
+            "node": "fir_sapling_c",
+            "size_m": [
+              0.622,
+              0.736,
+              0.634
+            ],
+            "min_y": -0.0,
+            "center_xz": [
+              1.995,
+              -0.003
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "fir_sapling_branches",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_sapling_twigs",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "fir_sapling_twigs",
+            "gltf_alphaMode": "OPAQUE",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling/fir_sapling_twigs_alpha_1k.jpg",
+            "bytes": 93038
+          }
+        ],
+        "total_bytes_with_alpha_maps": 25516640,
+        "extensions_used": [
+          "KHR_materials_specular",
+          "KHR_materials_ior"
+        ],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 10979,
+        "flag": "HEAVY: 25.42 MB, 433,021 polys - not realistic for real-time web as-is; decimate + meshopt and self-host, or use as a hero close-up only"
+      },
+      {
+        "id": "fir_sapling_medium",
+        "note": "medium fir saplings (up to ~9 m)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fir_sapling_medium/fir_sapling_medium_1k.gltf",
+        "gltf_bytes": 17059,
+        "include": {
+          "textures/fir_sapling_medium_branches_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling_medium/fir_sapling_medium_branches_nor_gl_1k.jpg",
+            "bytes": 1137533,
+            "http": 200,
+            "content_length": 1137533
+          },
+          "textures/fir_sapling_medium_branches_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling_medium/fir_sapling_medium_branches_diff_1k.jpg",
+            "bytes": 776567,
+            "http": 200,
+            "content_length": 776567
+          },
+          "textures/fir_sapling_medium_branches_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling_medium/fir_sapling_medium_branches_arm_1k.jpg",
+            "bytes": 789264,
+            "http": 200,
+            "content_length": 789264
+          },
+          "textures/fir_sapling_medium_twigs_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling_medium/fir_sapling_medium_twigs_nor_gl_1k.jpg",
+            "bytes": 472604,
+            "http": 200,
+            "content_length": 472604
+          },
+          "textures/fir_sapling_medium_twigs_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling_medium/fir_sapling_medium_twigs_diff_1k.jpg",
+            "bytes": 297200,
+            "http": 200,
+            "content_length": 297200
+          },
+          "textures/fir_sapling_medium_twigs_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling_medium/fir_sapling_medium_twigs_arm_1k.jpg",
+            "bytes": 407309,
+            "http": 200,
+            "content_length": 407309
+          },
+          "fir_sapling_medium.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/fir_sapling_medium/fir_sapling_medium.bin",
+            "bytes": 74159400,
+            "http": 200,
+            "content_length": 74159400
+          }
+        },
+        "total_bytes": 78056936,
+        "total_mb": 78.06,
+        "over_15mb": true,
+        "dims_m": [
+          14.793,
+          8.89,
+          5.276
+        ],
+        "bbox_m": {
+          "min": [
+            -2.552,
+            -0.152,
+            -2.556
+          ],
+          "max": [
+            12.241,
+            8.738,
+            2.72
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          26.092,
+          5.435,
+          9.164
+        ],
+        "polycount": 2308249,
+        "top_level_nodes": [
+          {
+            "node": "fir_sapling_medium_a_LOD0",
+            "size_m": [
+              4.988,
+              8.826,
+              5.276
+            ],
+            "min_y": -0.088,
+            "center_xz": [
+              -0.058,
+              0.082
+            ]
+          },
+          {
+            "node": "fir_sapling_medium_b_LOD0",
+            "size_m": [
+              4.269,
+              7.795,
+              3.958
+            ],
+            "min_y": -0.118,
+            "center_xz": [
+              5.09,
+              0.042
+            ]
+          },
+          {
+            "node": "fir_sapling_medium_c_LOD0",
+            "size_m": [
+              4.307,
+              5.907,
+              4.013
+            ],
+            "min_y": -0.152,
+            "center_xz": [
+              10.087,
+              0.064
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "fir_sapling_medium_branches",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_sapling_medium_twigs",
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_sapling_medium_branches_dead",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "fir_sapling_medium_twigs",
+            "gltf_alphaMode": "BLEND",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_sapling_medium/fir_sapling_medium_twigs_alpha_1k.jpg",
+            "bytes": 274407
+          }
+        ],
+        "total_bytes_with_alpha_maps": 78331343,
+        "extensions_used": [
+          "KHR_materials_specular",
+          "KHR_materials_ior",
+          "KHR_texture_transform"
+        ],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 17059,
+        "flag": "UNUSABLE IN BROWSER: 78.06 MB, 2,308,249 polys (bin shared by all resolutions, no LOD)"
+      },
+      {
+        "id": "fir_tree_01",
+        "note": "three tall firs (up to ~19 m) - fully modelled needles",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fir_tree_01/fir_tree_01_1k.gltf",
+        "gltf_bytes": 30279,
+        "include": {
+          "textures/fir_tree_01_bark_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_bark_nor_gl_1k.jpg",
+            "bytes": 1137533,
+            "http": 200,
+            "content_length": 1137533
+          },
+          "textures/fir_tree_01_bark_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_bark_diff_1k.jpg",
+            "bytes": 776567,
+            "http": 200,
+            "content_length": 776567
+          },
+          "textures/fir_tree_01_bark_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_bark_arm_1k.jpg",
+            "bytes": 789264,
+            "http": 200,
+            "content_length": 789264
+          },
+          "textures/fir_tree_01_trunk_a_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_trunk_a_nor_gl_1k.jpg",
+            "bytes": 997355,
+            "http": 200,
+            "content_length": 997355
+          },
+          "textures/fir_tree_01_trunk_a_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_trunk_a_diff_1k.jpg",
+            "bytes": 789806,
+            "http": 200,
+            "content_length": 789806
+          },
+          "textures/fir_tree_01_trunk_a_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_trunk_a_arm_1k.jpg",
+            "bytes": 788967,
+            "http": 200,
+            "content_length": 788967
+          },
+          "textures/fir_tree_01_twig_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_twig_nor_gl_1k.jpg",
+            "bytes": 472604,
+            "http": 200,
+            "content_length": 472604
+          },
+          "textures/fir_tree_01_twig_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_twig_diff_1k.jpg",
+            "bytes": 371741,
+            "http": 200,
+            "content_length": 371741
+          },
+          "textures/fir_tree_01_twig_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_twig_arm_1k.jpg",
+            "bytes": 407309,
+            "http": 200,
+            "content_length": 407309
+          },
+          "textures/fir_tree_01_trunk_b_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_trunk_b_nor_gl_1k.jpg",
+            "bytes": 915273,
+            "http": 200,
+            "content_length": 915273
+          },
+          "textures/fir_tree_01_trunk_b_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_trunk_b_diff_1k.jpg",
+            "bytes": 687662,
+            "http": 200,
+            "content_length": 687662
+          },
+          "textures/fir_tree_01_trunk_b_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_trunk_b_arm_1k.jpg",
+            "bytes": 732269,
+            "http": 200,
+            "content_length": 732269
+          },
+          "fir_tree_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/fir_tree_01/fir_tree_01.bin",
+            "bytes": 478462204,
+            "http": 200,
+            "content_length": 478462204
+          }
+        },
+        "total_bytes": 487358833,
+        "total_mb": 487.36,
+        "over_15mb": true,
+        "dims_m": [
+          18.778,
+          18.939,
+          6.511
+        ],
+        "bbox_m": {
+          "min": [
+            -3.219,
+            -0.094,
+            -3.541
+          ],
+          "max": [
+            15.559,
+            18.845,
+            2.97
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          26.733,
+          6.542,
+          19.268
+        ],
+        "polycount": 7853731,
+        "top_level_nodes": [
+          {
+            "node": "fir_tree_01_a_LOD0",
+            "size_m": [
+              6.534,
+              18.925,
+              6.427
+            ],
+            "min_y": -0.08,
+            "center_xz": [
+              0.048,
+              -0.327
+            ]
+          },
+          {
+            "node": "fir_tree_01_b_LOD0",
+            "size_m": [
+              5.613,
+              14.055,
+              6.057
+            ],
+            "min_y": -0.087,
+            "center_xz": [
+              6.242,
+              -0.111
+            ]
+          },
+          {
+            "node": "fir_tree_01_c_LOD0",
+            "size_m": [
+              6.306,
+              14.521,
+              5.966
+            ],
+            "min_y": -0.094,
+            "center_xz": [
+              12.406,
+              -0.013
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "fir_tree_01_bark",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_tree_01_trunk_a",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_tree_01_twig",
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_tree_01_dead_branches",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_tree_01_trunk_b",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "fir_tree_01_trunk_c",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "fir_tree_01_twig",
+            "gltf_alphaMode": "BLEND",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fir_tree_01/fir_tree_01_twig_alpha_1k.jpg",
+            "bytes": 274407
+          }
+        ],
+        "total_bytes_with_alpha_maps": 487633240,
+        "extensions_used": [
+          "KHR_materials_specular",
+          "KHR_materials_ior",
+          "KHR_texture_transform"
+        ],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 30279,
+        "flag": "UNUSABLE IN BROWSER: 487.36 MB, 7,853,731 polys (bin shared by all resolutions, no LOD)"
+      },
+      {
+        "id": "pine_sapling_medium",
+        "note": "medium pine saplings (up to ~11.5 m)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/pine_sapling_medium/pine_sapling_medium_1k.gltf",
+        "gltf_bytes": 16365,
+        "include": {
+          "textures/pine_sapling_medium_bark_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_medium/pine_sapling_medium_bark_nor_gl_1k.jpg",
+            "bytes": 1016849,
+            "http": 200,
+            "content_length": 1016849
+          },
+          "textures/pine_sapling_medium_bark_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_medium/pine_sapling_medium_bark_diff_1k.jpg",
+            "bytes": 725265,
+            "http": 200,
+            "content_length": 725265
+          },
+          "textures/pine_sapling_medium_bark_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_medium/pine_sapling_medium_bark_arm_1k.jpg",
+            "bytes": 801278,
+            "http": 200,
+            "content_length": 801278
+          },
+          "textures/pine_sapling_medium_twig_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_medium/pine_sapling_medium_twig_nor_gl_1k.jpg",
+            "bytes": 797935,
+            "http": 200,
+            "content_length": 797935
+          },
+          "textures/pine_sapling_medium_twig_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_medium/pine_sapling_medium_twig_diff_1k.jpg",
+            "bytes": 510932,
+            "http": 200,
+            "content_length": 510932
+          },
+          "textures/pine_sapling_medium_twig_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_medium/pine_sapling_medium_twig_arm_1k.jpg",
+            "bytes": 474787,
+            "http": 200,
+            "content_length": 474787
+          },
+          "pine_sapling_medium.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/pine_sapling_medium/pine_sapling_medium.bin",
+            "bytes": 263481032,
+            "http": 200,
+            "content_length": 263481032
+          }
+        },
+        "total_bytes": 267824443,
+        "total_mb": 267.82,
+        "over_15mb": true,
+        "dims_m": [
+          15.518,
+          11.5,
+          5.409
+        ],
+        "bbox_m": {
+          "min": [
+            -2.605,
+            -0.212,
+            -2.559
+          ],
+          "max": [
+            12.913,
+            11.289,
+            2.85
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          22.793,
+          5.462,
+          11.513
+        ],
+        "polycount": 9784670,
+        "top_level_nodes": [
+          {
+            "node": "pine_sapling_medium_a_LOD0",
+            "size_m": [
+              5.18,
+              11.493,
+              4.742
+            ],
+            "min_y": -0.204,
+            "center_xz": [
+              -0.015,
+              0.165
+            ]
+          },
+          {
+            "node": "pine_sapling_medium_b_LOD0",
+            "size_m": [
+              4.762,
+              9.116,
+              5.409
+            ],
+            "min_y": -0.209,
+            "center_xz": [
+              5.978,
+              0.146
+            ]
+          },
+          {
+            "node": "pine_sapling_medium_c_LOD0",
+            "size_m": [
+              3.818,
+              7.012,
+              3.518
+            ],
+            "min_y": -0.212,
+            "center_xz": [
+              11.004,
+              0.141
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "pine_sapling_medium_bark",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_sapling_medium_twig",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_sapling_medium_dead_branches",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "pine_sapling_medium_twig",
+            "gltf_alphaMode": "OPAQUE",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_sapling_medium/pine_sapling_medium_twig_alpha_1k.jpg",
+            "bytes": 195206
+          }
+        ],
+        "total_bytes_with_alpha_maps": 268019649,
+        "extensions_used": [
+          "KHR_materials_specular",
+          "KHR_materials_ior",
+          "KHR_texture_transform"
+        ],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 16365,
+        "flag": "UNUSABLE IN BROWSER: 267.82 MB, 9,784,670 polys (bin shared by all resolutions, no LOD)"
+      },
+      {
+        "id": "pine_tree_01",
+        "note": "tall pines (up to ~17.6 m) - fully modelled needles",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/pine_tree_01/pine_tree_01_1k.gltf",
+        "gltf_bytes": 30596,
+        "include": {
+          "textures/pine_tree_01_bark_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_bark_nor_gl_1k.jpg",
+            "bytes": 1016849,
+            "http": 200,
+            "content_length": 1016849
+          },
+          "textures/pine_tree_01_bark_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_bark_diff_1k.jpg",
+            "bytes": 725265,
+            "http": 200,
+            "content_length": 725265
+          },
+          "textures/pine_tree_01_bark_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_bark_arm_1k.jpg",
+            "bytes": 801278,
+            "http": 200,
+            "content_length": 801278
+          },
+          "textures/pine_tree_01_trunk_a_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_trunk_a_nor_gl_1k.jpg",
+            "bytes": 997355,
+            "http": 200,
+            "content_length": 997355
+          },
+          "textures/pine_tree_01_trunk_a_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_trunk_a_diff_1k.jpg",
+            "bytes": 789806,
+            "http": 200,
+            "content_length": 789806
+          },
+          "textures/pine_tree_01_trunk_a_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_trunk_a_arm_1k.jpg",
+            "bytes": 788967,
+            "http": 200,
+            "content_length": 788967
+          },
+          "textures/pine_tree_01_twig_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_twig_nor_gl_1k.jpg",
+            "bytes": 797935,
+            "http": 200,
+            "content_length": 797935
+          },
+          "textures/pine_tree_01_twig_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_twig_diff_1k.jpg",
+            "bytes": 510932,
+            "http": 200,
+            "content_length": 510932
+          },
+          "textures/pine_tree_01_twig_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_twig_arm_1k.jpg",
+            "bytes": 474787,
+            "http": 200,
+            "content_length": 474787
+          },
+          "textures/pine_tree_01_trunk_b_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_trunk_b_nor_gl_1k.jpg",
+            "bytes": 915273,
+            "http": 200,
+            "content_length": 915273
+          },
+          "textures/pine_tree_01_trunk_b_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_trunk_b_diff_1k.jpg",
+            "bytes": 687662,
+            "http": 200,
+            "content_length": 687662
+          },
+          "textures/pine_tree_01_trunk_b_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_trunk_b_arm_1k.jpg",
+            "bytes": 732269,
+            "http": 200,
+            "content_length": 732269
+          },
+          "pine_tree_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/pine_tree_01/pine_tree_01.bin",
+            "bytes": 948849556,
+            "http": 200,
+            "content_length": 948849556
+          }
+        },
+        "total_bytes": 958118530,
+        "total_mb": 958.12,
+        "over_15mb": true,
+        "dims_m": [
+          21.827,
+          20.388,
+          8.552
+        ],
+        "bbox_m": {
+          "min": [
+            -9.491,
+            -0.094,
+            -4.483
+          ],
+          "max": [
+            12.336,
+            20.295,
+            4.069
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          26.72,
+          1.301,
+          17.578
+        ],
+        "polycount": 17427094,
+        "top_level_nodes": [
+          {
+            "node": "pine_tree_01_a_LOD0",
+            "size_m": [
+              7.601,
+              20.375,
+              8.314
+            ],
+            "min_y": -0.08,
+            "center_xz": [
+              -5.69,
+              -0.326
+            ]
+          },
+          {
+            "node": "pine_tree_01_b_LOD0",
+            "size_m": [
+              7.224,
+              14.881,
+              7.597
+            ],
+            "min_y": -0.087,
+            "center_xz": [
+              1.071,
+              0.271
+            ]
+          },
+          {
+            "node": "pine_tree_01_c_LOD0",
+            "size_m": [
+              7.626,
+              17.544,
+              7.855
+            ],
+            "min_y": -0.094,
+            "center_xz": [
+              8.523,
+              -0.153
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "pine_tree_01_bark",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_tree_01_trunk_a",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_tree_01_twig",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_tree_01_dead_branches",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_tree_01_trunk_b",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "pine_tree_01_trunk_c",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "pine_tree_01_twig",
+            "gltf_alphaMode": "OPAQUE",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/pine_tree_01/pine_tree_01_twig_alpha_1k.jpg",
+            "bytes": 195206
+          }
+        ],
+        "total_bytes_with_alpha_maps": 958313736,
+        "extensions_used": [
+          "KHR_materials_specular",
+          "KHR_materials_ior",
+          "KHR_texture_transform"
+        ],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 30596,
+        "flag": "UNUSABLE IN BROWSER: 958.12 MB, 17,427,094 polys (bin shared by all resolutions, no LOD)"
+      }
+    ],
+    "shrubs": [
+      {
+        "id": "fern_02",
+        "note": "four fern clumps (~0.43 m) - good forest understory",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/fern_02/fern_02_1k.gltf",
+        "gltf_bytes": 6899,
+        "include": {
+          "textures/fern_02_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fern_02/fern_02_arm_1k.jpg",
+            "bytes": 280359,
+            "http": 200,
+            "content_length": 280359
+          },
+          "textures/fern_02_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fern_02/fern_02_diff_1k.jpg",
+            "bytes": 315705,
+            "http": 200,
+            "content_length": 315705
+          },
+          "textures/fern_02_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fern_02/fern_02_nor_gl_1k.jpg",
+            "bytes": 367222,
+            "http": 200,
+            "content_length": 367222
+          },
+          "fern_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/fern_02/fern_02.bin",
+            "bytes": 176176,
+            "http": 200,
+            "content_length": 176176
+          }
+        },
+        "total_bytes": 1146361,
+        "total_mb": 1.15,
+        "over_15mb": false,
+        "dims_m": [
+          1.973,
+          0.428,
+          1.724
+        ],
+        "bbox_m": {
+          "min": [
+            -0.528,
+            -0.031,
+            -0.422
+          ],
+          "max": [
+            1.444,
+            0.397,
+            1.302
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.973,
+          1.724,
+          0.428
+        ],
+        "polycount": 6232,
+        "top_level_nodes": [
+          {
+            "node": "fern_02_b",
+            "size_m": [
+              0.99,
+              0.428,
+              0.894
+            ],
+            "min_y": -0.031,
+            "center_xz": [
+              -0.033,
+              0.025
+            ]
+          },
+          {
+            "node": "fern_02_c",
+            "size_m": [
+              0.874,
+              0.349,
+              0.765
+            ],
+            "min_y": -0.029,
+            "center_xz": [
+              1.007,
+              -0.035
+            ]
+          },
+          {
+            "node": "fern_02_a",
+            "size_m": [
+              0.552,
+              0.287,
+              0.613
+            ],
+            "min_y": -0.029,
+            "center_xz": [
+              -0.022,
+              0.995
+            ]
+          },
+          {
+            "node": "fern_02_d",
+            "size_m": [
+              0.573,
+              0.213,
+              0.593
+            ],
+            "min_y": -0.014,
+            "center_xz": [
+              0.996,
+              0.945
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "fern_02",
+            "alphaMode": "MASK",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "fern_02",
+            "gltf_alphaMode": "MASK",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/fern_02/fern_02_alpha_1k.jpg",
+            "bytes": 246038
+          }
+        ],
+        "total_bytes_with_alpha_maps": 1392399,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 6899
+      },
+      {
+        "id": "shrub_02",
+        "note": "several ~2 m wild shrubs with narrow leaves",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/shrub_02/shrub_02_1k.gltf",
+        "gltf_bytes": 8083,
+        "include": {
+          "textures/shrub_02_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/shrub_02/shrub_02_arm_1k.jpg",
+            "bytes": 313715,
+            "http": 200,
+            "content_length": 313715
+          },
+          "textures/shrub_02_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/shrub_02/shrub_02_nor_gl_1k.jpg",
+            "bytes": 490815,
+            "http": 200,
+            "content_length": 490815
+          },
+          "shrub_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/shrub_02/shrub_02.bin",
+            "bytes": 758692,
+            "http": 200,
+            "content_length": 758692
+          },
+          "textures/shrub_02_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/shrub_02/shrub_02_diff_1k.jpg",
+            "bytes": 395120,
+            "http": 200,
+            "content_length": 395120
+          }
+        },
+        "total_bytes": 1966425,
+        "total_mb": 1.97,
+        "over_15mb": false,
+        "dims_m": [
+          6.573,
+          2.548,
+          2.536
+        ],
+        "bbox_m": {
+          "min": [
+            -2.309,
+            -0.606,
+            -1.191
+          ],
+          "max": [
+            4.264,
+            1.942,
+            1.345
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          5.341,
+          2.061,
+          2.071
+        ],
+        "polycount": 52317,
+        "top_level_nodes": [
+          {
+            "node": "shrub_02_a",
+            "size_m": [
+              1.636,
+              2.158,
+              1.832
+            ],
+            "min_y": -0.217,
+            "center_xz": [
+              -1.491,
+              -0.043
+            ]
+          },
+          {
+            "node": "shrub_02_b",
+            "size_m": [
+              2.063,
+              1.954,
+              1.821
+            ],
+            "min_y": -0.323,
+            "center_xz": [
+              0.043,
+              0.156
+            ]
+          },
+          {
+            "node": "shrub_02_c",
+            "size_m": [
+              2.483,
+              2.382,
+              2.536
+            ],
+            "min_y": -0.606,
+            "center_xz": [
+              1.658,
+              0.077
+            ]
+          },
+          {
+            "node": "shrub_02_d",
+            "size_m": [
+              1.613,
+              1.947,
+              1.817
+            ],
+            "min_y": -0.339,
+            "center_xz": [
+              3.458,
+              -0.1
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "shrub_02",
+            "alphaMode": "MASK",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "shrub_02",
+            "gltf_alphaMode": "MASK",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/shrub_02/shrub_02_alpha_1k.jpg",
+            "bytes": 116592
+          }
+        ],
+        "total_bytes_with_alpha_maps": 2083017,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 8083
+      }
+    ],
+    "ground_cover": [
+      {
+        "id": "grass_medium_02",
+        "note": "medium grass tufts (~1.4 m wide) for lawn edges",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/grass_medium_02/grass_medium_02_1k.gltf",
+        "gltf_bytes": 8864,
+        "include": {
+          "textures/grass_medium_02_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/grass_medium_02/grass_medium_02_nor_gl_1k.jpg",
+            "bytes": 118146,
+            "http": 200,
+            "content_length": 118146
+          },
+          "textures/grass_medium_02_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/grass_medium_02/grass_medium_02_diff_1k.jpg",
+            "bytes": 161235,
+            "http": 200,
+            "content_length": 161235
+          },
+          "textures/grass_medium_02_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/grass_medium_02/grass_medium_02_arm_1k.jpg",
+            "bytes": 241181,
+            "http": 200,
+            "content_length": 241181
+          },
+          "grass_medium_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/grass_medium_02/grass_medium_02.bin",
+            "bytes": 272048,
+            "http": 200,
+            "content_length": 272048
+          }
+        },
+        "total_bytes": 801474,
+        "total_mb": 0.8,
+        "over_15mb": false,
+        "dims_m": [
+          1.311,
+          0.405,
+          0.433
+        ],
+        "bbox_m": {
+          "min": [
+            -0.056,
+            -0.006,
+            -0.175
+          ],
+          "max": [
+            1.255,
+            0.4,
+            0.258
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          3.58,
+          1.407,
+          1.448
+        ],
+        "polycount": 1043926,
+        "top_level_nodes": [
+          {
+            "node": "grass_medium_02_a",
+            "size_m": [
+              0.119,
+              0.157,
+              0.12
+            ],
+            "min_y": -0.003,
+            "center_xz": [
+              0.004,
+              0.003
+            ]
+          },
+          {
+            "node": "grass_medium_02_b",
+            "size_m": [
+              0.179,
+              0.18,
+              0.199
+            ],
+            "min_y": -0.004,
+            "center_xz": [
+              0.235,
+              -0.005
+            ]
+          },
+          {
+            "node": "grass_medium_02_c",
+            "size_m": [
+              0.262,
+              0.232,
+              0.25
+            ],
+            "min_y": -0.006,
+            "center_xz": [
+              0.48,
+              -0.036
+            ]
+          },
+          {
+            "node": "grass_medium_02_d",
+            "size_m": [
+              0.317,
+              0.26,
+              0.362
+            ],
+            "min_y": -0.005,
+            "center_xz": [
+              0.767,
+              0.027
+            ]
+          },
+          {
+            "node": "grass_medium_02_e",
+            "size_m": [
+              0.356,
+              0.403,
+              0.433
+            ],
+            "min_y": -0.003,
+            "center_xz": [
+              1.077,
+              0.041
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "grass_medium_02",
+            "alphaMode": "BLEND",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "grass_medium_02",
+            "gltf_alphaMode": "BLEND",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/grass_medium_02/grass_medium_02_alpha_1k.jpg",
+            "bytes": 114863
+          }
+        ],
+        "total_bytes_with_alpha_maps": 916337,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 8864
+      }
+    ],
+    "rocks": [
+      {
+        "id": "rock_moss_set_02",
+        "note": "set of grey mossy forest rocks (pine_forest collection)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/rock_moss_set_02/rock_moss_set_02_1k.gltf",
+        "gltf_bytes": 11608,
+        "include": {
+          "textures/rock_moss_set_02_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_nor_gl_1k.jpg",
+            "bytes": 273527,
+            "http": 200,
+            "content_length": 273527
+          },
+          "textures/rock_moss_set_02_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_diff_1k.jpg",
+            "bytes": 194307,
+            "http": 200,
+            "content_length": 194307
+          },
+          "textures/rock_moss_set_02_rough_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_02/rock_moss_set_02_rough_1k.jpg",
+            "bytes": 146226,
+            "http": 200,
+            "content_length": 146226
+          },
+          "rock_moss_set_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/rock_moss_set_02/rock_moss_set_02.bin",
+            "bytes": 1316572,
+            "http": 200,
+            "content_length": 1316572
+          }
+        },
+        "total_bytes": 1942240,
+        "total_mb": 1.94,
+        "over_15mb": false,
+        "dims_m": [
+          8.278,
+          1.368,
+          3.41
+        ],
+        "bbox_m": {
+          "min": [
+            -3.809,
+            -0.315,
+            -1.914
+          ],
+          "max": [
+            4.47,
+            1.053,
+            1.496
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          8.278,
+          3.41,
+          1.368
+        ],
+        "polycount": 57647,
+        "top_level_nodes": [
+          {
+            "node": "rock_moss_set_02_rock08",
+            "size_m": [
+              1.206,
+              0.529,
+              0.984
+            ],
+            "min_y": -0.011,
+            "center_xz": [
+              -0.899,
+              0.777
+            ]
+          },
+          {
+            "node": "rock_moss_set_02_rock09",
+            "size_m": [
+              1.629,
+              0.61,
+              1.011
+            ],
+            "min_y": -0.038,
+            "center_xz": [
+              0.891,
+              0.709
+            ]
+          },
+          {
+            "node": "rock_moss_set_02_rock12",
+            "size_m": [
+              1.58,
+              0.736,
+              1.443
+            ],
+            "min_y": -0.032,
+            "center_xz": [
+              0.192,
+              -0.965
+            ]
+          },
+          {
+            "node": "rock_moss_set_02_rock13",
+            "size_m": [
+              2.091,
+              1.256,
+              1.138
+            ],
+            "min_y": -0.315,
+            "center_xz": [
+              2.626,
+              -1.123
+            ]
+          },
+          {
+            "node": "rock_moss_set_02_rock10",
+            "size_m": [
+              2.203,
+              0.768,
+              1.552
+            ],
+            "min_y": -0.024,
+            "center_xz": [
+              3.368,
+              0.72
+            ]
+          },
+          {
+            "node": "rock_moss_set_02_rock11",
+            "size_m": [
+              1.954,
+              1.311,
+              1.529
+            ],
+            "min_y": -0.257,
+            "center_xz": [
+              -2.133,
+              -1.15
+            ]
+          },
+          {
+            "node": "rock_moss_set_02_rock07",
+            "size_m": [
+              1.693,
+              0.745,
+              1.215
+            ],
+            "min_y": -0.093,
+            "center_xz": [
+              -2.962,
+              0.724
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "rock_moss_set_02",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 1942240,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 11608
+      },
+      {
+        "id": "rock_moss_set_01",
+        "note": "set of six mossy forest rocks, browner",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/rock_moss_set_01/rock_moss_set_01_1k.gltf",
+        "gltf_bytes": 9987,
+        "include": {
+          "textures/rock_moss_set_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_01/rock_moss_set_01_nor_gl_1k.jpg",
+            "bytes": 209975,
+            "http": 200,
+            "content_length": 209975
+          },
+          "rock_moss_set_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/rock_moss_set_01/rock_moss_set_01.bin",
+            "bytes": 1466380,
+            "http": 200,
+            "content_length": 1466380
+          },
+          "textures/rock_moss_set_01_rough_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_01/rock_moss_set_01_rough_1k.jpg",
+            "bytes": 82624,
+            "http": 200,
+            "content_length": 82624
+          },
+          "textures/rock_moss_set_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/rock_moss_set_01/rock_moss_set_01_diff_1k.jpg",
+            "bytes": 168099,
+            "http": 200,
+            "content_length": 168099
+          }
+        },
+        "total_bytes": 1937065,
+        "total_mb": 1.94,
+        "over_15mb": false,
+        "dims_m": [
+          8.005,
+          1.768,
+          6.949
+        ],
+        "bbox_m": {
+          "min": [
+            -3.914,
+            -0.661,
+            -3.824
+          ],
+          "max": [
+            4.091,
+            1.107,
+            3.125
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          8.005,
+          6.949,
+          1.768
+        ],
+        "polycount": 63127,
+        "top_level_nodes": [
+          {
+            "node": "rock_moss_set_01_rock01",
+            "size_m": [
+              2.238,
+              1.473,
+              3.369
+            ],
+            "min_y": -0.657,
+            "center_xz": [
+              -2.795,
+              -2.139
+            ]
+          },
+          {
+            "node": "rock_moss_set_01_rock02",
+            "size_m": [
+              2.655,
+              1.262,
+              3.264
+            ],
+            "min_y": -0.466,
+            "center_xz": [
+              0.055,
+              -2.135
+            ]
+          },
+          {
+            "node": "rock_moss_set_01_rock03",
+            "size_m": [
+              2.109,
+              1.1,
+              2.08
+            ],
+            "min_y": -0.411,
+            "center_xz": [
+              3.036,
+              -2.107
+            ]
+          },
+          {
+            "node": "rock_moss_set_01_rock04",
+            "size_m": [
+              2.128,
+              1.768,
+              1.965
+            ],
+            "min_y": -0.661,
+            "center_xz": [
+              -2.586,
+              1.672
+            ]
+          },
+          {
+            "node": "rock_moss_set_01_rock05",
+            "size_m": [
+              1.817,
+              1.205,
+              2.999
+            ],
+            "min_y": -0.573,
+            "center_xz": [
+              0.198,
+              1.626
+            ]
+          },
+          {
+            "node": "rock_moss_set_01_rock06",
+            "size_m": [
+              2.126,
+              1.262,
+              2.757
+            ],
+            "min_y": -0.528,
+            "center_xz": [
+              2.662,
+              1.476
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "rock_moss_set_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 1937065,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 9987
+      },
+      {
+        "id": "boulder_01",
+        "note": "single ~1.8 m weathered boulder, reddish-brown",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/boulder_01/boulder_01_1k.gltf",
+        "gltf_bytes": 2773,
+        "include": {
+          "textures/boulder_01_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boulder_01/boulder_01_arm_1k.jpg",
+            "bytes": 659386,
+            "http": 200,
+            "content_length": 659386
+          },
+          "textures/boulder_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boulder_01/boulder_01_diff_1k.jpg",
+            "bytes": 987467,
+            "http": 200,
+            "content_length": 987467
+          },
+          "boulder_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/boulder_01/boulder_01.bin",
+            "bytes": 2938808,
+            "http": 200,
+            "content_length": 2938808
+          },
+          "textures/boulder_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/boulder_01/boulder_01_nor_gl_1k.jpg",
+            "bytes": 1183552,
+            "http": 200,
+            "content_length": 1183552
+          }
+        },
+        "total_bytes": 5771986,
+        "total_mb": 5.77,
+        "over_15mb": false,
+        "dims_m": [
+          1.272,
+          1.004,
+          1.83
+        ],
+        "bbox_m": {
+          "min": [
+            -0.748,
+            -0.074,
+            -0.948
+          ],
+          "max": [
+            0.524,
+            0.93,
+            0.882
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.273,
+          1.831,
+          1.004
+        ],
+        "polycount": 123976,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "boulder_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 5771986,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2773
+      }
+    ],
+    "sofa": [
+      {
+        "id": "Sofa_01",
+        "note": "light-grey upholstered 2-seat sofa, vintage carved frame (NO modern sofa exists on PH)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/Sofa_01/Sofa_01_1k.gltf",
+        "gltf_bytes": 2636,
+        "include": {
+          "textures/Sofa_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Sofa_01/Sofa_01_diff_1k.jpg",
+            "bytes": 134925,
+            "http": 200,
+            "content_length": 134925
+          },
+          "textures/Sofa_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Sofa_01/Sofa_01_nor_gl_1k.jpg",
+            "bytes": 154517,
+            "http": 200,
+            "content_length": 154517
+          },
+          "Sofa_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/Sofa_01/Sofa_01.bin",
+            "bytes": 111264,
+            "http": 200,
+            "content_length": 111264
+          },
+          "textures/Sofa_01_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/Sofa_01/Sofa_01_arm_1k.jpg",
+            "bytes": 114593,
+            "http": 200,
+            "content_length": 114593
+          }
+        },
+        "total_bytes": 517935,
+        "total_mb": 0.52,
+        "over_15mb": false,
+        "dims_m": [
+          1.571,
+          0.797,
+          0.658
+        ],
+        "bbox_m": {
+          "min": [
+            -0.778,
+            -0.001,
+            -0.361
+          ],
+          "max": [
+            0.793,
+            0.796,
+            0.297
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.571,
+          0.658,
+          0.797
+        ],
+        "polycount": 4101,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "Sofa_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 517935,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2636
+      },
+      {
+        "id": "sofa_02",
+        "note": "dark tufted leather loveseat, carved wood base (vintage)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/sofa_02/sofa_02_1k.gltf",
+        "gltf_bytes": 4183,
+        "include": {
+          "textures/sofa_02_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_diff_1k.jpg",
+            "bytes": 86514,
+            "http": 200,
+            "content_length": 86514
+          },
+          "textures/sofa_02_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_arm_1k.jpg",
+            "bytes": 121752,
+            "http": 200,
+            "content_length": 121752
+          },
+          "textures/sofa_02_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/sofa_02/sofa_02_nor_gl_1k.jpg",
+            "bytes": 139858,
+            "http": 200,
+            "content_length": 139858
+          },
+          "sofa_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/sofa_02/sofa_02.bin",
+            "bytes": 74864,
+            "http": 200,
+            "content_length": 74864
+          }
+        },
+        "total_bytes": 427171,
+        "total_mb": 0.43,
+        "over_15mb": false,
+        "dims_m": [
+          1.807,
+          0.709,
+          0.818
+        ],
+        "bbox_m": {
+          "min": [
+            -0.903,
+            0.0,
+            -0.478
+          ],
+          "max": [
+            0.904,
+            0.71,
+            0.34
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.807,
+          0.818,
+          0.709
+        ],
+        "polycount": 2728,
+        "top_level_nodes": [
+          {
+            "node": "sofa_02_Base",
+            "size_m": [
+              1.807,
+              0.709,
+              0.811
+            ],
+            "min_y": 0.0,
+            "center_xz": [
+              0.0,
+              -0.072
+            ]
+          },
+          {
+            "node": "sofa_02_Seat",
+            "size_m": [
+              1.416,
+              0.164,
+              0.528
+            ],
+            "min_y": 0.247,
+            "center_xz": [
+              0.002,
+              0.076
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "sofa_02",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 427171,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 4183
+      }
+    ],
+    "armchair": [
+      {
+        "id": "modern_arm_chair_01",
+        "note": "modern oak frame + black leather cushions - best modern match",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/modern_arm_chair_01/modern_arm_chair_01_1k.gltf",
+        "gltf_bytes": 5121,
+        "include": {
+          "textures/modern_arm_chair_01_pillow_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_arm_chair_01/modern_arm_chair_01_pillow_nor_gl_1k.jpg",
+            "bytes": 302377,
+            "http": 200,
+            "content_length": 302377
+          },
+          "textures/modern_arm_chair_01_legs_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_arm_chair_01/modern_arm_chair_01_legs_nor_gl_1k.jpg",
+            "bytes": 560864,
+            "http": 200,
+            "content_length": 560864
+          },
+          "textures/modern_arm_chair_01_pillow_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_arm_chair_01/modern_arm_chair_01_pillow_arm_1k.jpg",
+            "bytes": 321223,
+            "http": 200,
+            "content_length": 321223
+          },
+          "textures/modern_arm_chair_01_legs_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_arm_chair_01/modern_arm_chair_01_legs_diff_1k.jpg",
+            "bytes": 460937,
+            "http": 200,
+            "content_length": 460937
+          },
+          "textures/modern_arm_chair_01_legs_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_arm_chair_01/modern_arm_chair_01_legs_arm_1k.jpg",
+            "bytes": 577931,
+            "http": 200,
+            "content_length": 577931
+          },
+          "modern_arm_chair_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modern_arm_chair_01/modern_arm_chair_01.bin",
+            "bytes": 240728,
+            "http": 200,
+            "content_length": 240728
+          },
+          "textures/modern_arm_chair_01_pillow_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_arm_chair_01/modern_arm_chair_01_pillow_diff_1k.jpg",
+            "bytes": 228851,
+            "http": 200,
+            "content_length": 228851
+          }
+        },
+        "total_bytes": 2698032,
+        "total_mb": 2.7,
+        "over_15mb": false,
+        "dims_m": [
+          0.82,
+          1.023,
+          0.987
+        ],
+        "bbox_m": {
+          "min": [
+            -0.407,
+            0.0,
+            -0.575
+          ],
+          "max": [
+            0.414,
+            1.023,
+            0.411
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          0.82,
+          0.987,
+          1.023
+        ],
+        "polycount": 8916,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "modern_arm_chair_01_legs",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "modern_arm_chair_01_pillow",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 2698032,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 5121
+      },
+      {
+        "id": "mid_century_lounge_chair",
+        "note": "mid-century swivel lounge chair, brown leather",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/mid_century_lounge_chair/mid_century_lounge_chair_1k.gltf",
+        "gltf_bytes": 2884,
+        "include": {
+          "textures/mid_century_lounge_chair_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/mid_century_lounge_chair/mid_century_lounge_chair_nor_gl_1k.jpg",
+            "bytes": 648960,
+            "http": 200,
+            "content_length": 648960
+          },
+          "textures/mid_century_lounge_chair_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/mid_century_lounge_chair/mid_century_lounge_chair_diff_1k.jpg",
+            "bytes": 627298,
+            "http": 200,
+            "content_length": 627298
+          },
+          "textures/mid_century_lounge_chair_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/mid_century_lounge_chair/mid_century_lounge_chair_arm_1k.jpg",
+            "bytes": 636493,
+            "http": 200,
+            "content_length": 636493
+          },
+          "mid_century_lounge_chair.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/mid_century_lounge_chair/mid_century_lounge_chair.bin",
+            "bytes": 171384,
+            "http": 200,
+            "content_length": 171384
+          }
+        },
+        "total_bytes": 2087019,
+        "total_mb": 2.09,
+        "over_15mb": false,
+        "dims_m": [
+          1.009,
+          1.169,
+          1.19
+        ],
+        "bbox_m": {
+          "min": [
+            -0.504,
+            -0.0,
+            -0.661
+          ],
+          "max": [
+            0.504,
+            1.169,
+            0.529
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.009,
+          1.19,
+          1.169
+        ],
+        "polycount": 6148,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "mid_century_lounge_chair",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 2087019,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2884
+      }
+    ],
+    "coffee_table": [
+      {
+        "id": "modern_coffee_table_01",
+        "note": "contemporary rectangular table, stone-look top with wood inlay",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/modern_coffee_table_01/modern_coffee_table_01_1k.gltf",
+        "gltf_bytes": 2771,
+        "include": {
+          "modern_coffee_table_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modern_coffee_table_01/modern_coffee_table_01.bin",
+            "bytes": 154864,
+            "http": 200,
+            "content_length": 154864
+          },
+          "textures/modern_coffee_table_01_rough_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_coffee_table_01/modern_coffee_table_01_rough_1k.jpg",
+            "bytes": 403959,
+            "http": 200,
+            "content_length": 403959
+          },
+          "textures/modern_coffee_table_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_coffee_table_01/modern_coffee_table_01_diff_1k.jpg",
+            "bytes": 410569,
+            "http": 200,
+            "content_length": 410569
+          },
+          "textures/modern_coffee_table_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_coffee_table_01/modern_coffee_table_01_nor_gl_1k.jpg",
+            "bytes": 359134,
+            "http": 200,
+            "content_length": 359134
+          }
+        },
+        "total_bytes": 1331297,
+        "total_mb": 1.33,
+        "over_15mb": false,
+        "dims_m": [
+          0.6,
+          0.39,
+          1.202
+        ],
+        "bbox_m": {
+          "min": [
+            -0.3,
+            -0.0,
+            -0.601
+          ],
+          "max": [
+            0.3,
+            0.39,
+            0.601
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.202,
+          0.6,
+          0.39
+        ],
+        "polycount": 4504,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "modern_coffee_table_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 1331297,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2771
+      },
+      {
+        "id": "coffee_table_round_01",
+        "note": "round white marble top, looping metal legs",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/coffee_table_round_01/coffee_table_round_01_1k.gltf",
+        "gltf_bytes": 2776,
+        "include": {
+          "textures/coffee_table_round_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/coffee_table_round_01/coffee_table_round_01_diff_1k.jpg",
+            "bytes": 447037,
+            "http": 200,
+            "content_length": 447037
+          },
+          "textures/coffee_table_round_01_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/coffee_table_round_01/coffee_table_round_01_arm_1k.jpg",
+            "bytes": 721708,
+            "http": 200,
+            "content_length": 721708
+          },
+          "coffee_table_round_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/coffee_table_round_01/coffee_table_round_01.bin",
+            "bytes": 131112,
+            "http": 200,
+            "content_length": 131112
+          },
+          "textures/coffee_table_round_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/coffee_table_round_01/coffee_table_round_01_nor_gl_1k.jpg",
+            "bytes": 260520,
+            "http": 200,
+            "content_length": 260520
+          }
+        },
+        "total_bytes": 1563153,
+        "total_mb": 1.56,
+        "over_15mb": false,
+        "dims_m": [
+          1.301,
+          0.491,
+          1.301
+        ],
+        "bbox_m": {
+          "min": [
+            -0.651,
+            -0.001,
+            -0.651
+          ],
+          "max": [
+            0.651,
+            0.49,
+            0.651
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.301,
+          1.301,
+          0.491
+        ],
+        "polycount": 4044,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "coffee_table_round_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 1563153,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2776
+      }
+    ],
+    "dining_table": [
+      {
+        "id": "wooden_table_02",
+        "note": "simple plain wooden table - clean but small (1.13 x 0.71 m, 4-seat); scale X ~1.6 for a 6-seat table",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/wooden_table_02/wooden_table_02_1k.gltf",
+        "gltf_bytes": 2687,
+        "include": {
+          "textures/wooden_table_02_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_table_02/wooden_table_02_diff_1k.jpg",
+            "bytes": 178379,
+            "http": 200,
+            "content_length": 178379
+          },
+          "textures/wooden_table_02_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_table_02/wooden_table_02_nor_gl_1k.jpg",
+            "bytes": 122129,
+            "http": 200,
+            "content_length": 122129
+          },
+          "wooden_table_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/wooden_table_02/wooden_table_02.bin",
+            "bytes": 7576,
+            "http": 200,
+            "content_length": 7576
+          },
+          "textures/wooden_table_02_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/wooden_table_02/wooden_table_02_arm_1k.jpg",
+            "bytes": 174545,
+            "http": 200,
+            "content_length": 174545
+          }
+        },
+        "total_bytes": 485316,
+        "total_mb": 0.49,
+        "over_15mb": false,
+        "dims_m": [
+          1.134,
+          0.8,
+          0.706
+        ],
+        "bbox_m": {
+          "min": [
+            -0.567,
+            -0.0,
+            -0.353
+          ],
+          "max": [
+            0.567,
+            0.799,
+            0.353
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.134,
+          0.706,
+          0.8
+        ],
+        "polycount": 196,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "wooden_table_02",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 485316,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2687
+      },
+      {
+        "id": "dining_table",
+        "note": "rustic wooden dining table WITH a draped checked tablecloth baked into the mesh",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/dining_table/dining_table_1k.gltf",
+        "gltf_bytes": 4165,
+        "include": {
+          "textures/dining_table_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dining_table/dining_table_nor_gl_1k.jpg",
+            "bytes": 707020,
+            "http": 200,
+            "content_length": 707020
+          },
+          "textures/dining_table_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dining_table/dining_table_diff_1k.jpg",
+            "bytes": 852259,
+            "http": 200,
+            "content_length": 852259
+          },
+          "textures/dining_table_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dining_table/dining_table_arm_1k.jpg",
+            "bytes": 689497,
+            "http": 200,
+            "content_length": 689497
+          },
+          "dining_table.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/dining_table/dining_table.bin",
+            "bytes": 30992,
+            "http": 200,
+            "content_length": 30992
+          }
+        },
+        "total_bytes": 2283933,
+        "total_mb": 2.28,
+        "over_15mb": false,
+        "dims_m": [
+          2.256,
+          0.877,
+          1.39
+        ],
+        "bbox_m": {
+          "min": [
+            -1.133,
+            -0.004,
+            -0.678
+          ],
+          "max": [
+            1.123,
+            0.873,
+            0.712
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          2.256,
+          1.39,
+          0.877
+        ],
+        "polycount": 1048,
+        "top_level_nodes": [
+          {
+            "node": "dining_table",
+            "size_m": [
+              2.047,
+              0.791,
+              1.152
+            ],
+            "min_y": -0.004,
+            "center_xz": [
+              0.0,
+              -0.006
+            ]
+          },
+          {
+            "node": "dining_table_cloth",
+            "size_m": [
+              2.256,
+              0.48,
+              1.39
+            ],
+            "min_y": 0.393,
+            "center_xz": [
+              -0.005,
+              0.017
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "dining_table",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 2283933,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 4165
+      }
+    ],
+    "dining_chair": [
+      {
+        "id": "dining_chair_02",
+        "note": "modern dining chair, tufted brown leather",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/dining_chair_02/dining_chair_02_1k.gltf",
+        "gltf_bytes": 2723,
+        "include": {
+          "dining_chair_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/dining_chair_02/dining_chair_02.bin",
+            "bytes": 544592,
+            "http": 200,
+            "content_length": 544592
+          },
+          "textures/dining_chair_02_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dining_chair_02/dining_chair_02_nor_gl_1k.jpg",
+            "bytes": 119612,
+            "http": 200,
+            "content_length": 119612
+          },
+          "textures/dining_chair_02_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dining_chair_02/dining_chair_02_diff_1k.jpg",
+            "bytes": 91518,
+            "http": 200,
+            "content_length": 91518
+          },
+          "textures/dining_chair_02_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/dining_chair_02/dining_chair_02_arm_1k.jpg",
+            "bytes": 162630,
+            "http": 200,
+            "content_length": 162630
+          }
+        },
+        "total_bytes": 921075,
+        "total_mb": 0.92,
+        "over_15mb": false,
+        "dims_m": [
+          0.434,
+          0.973,
+          0.576
+        ],
+        "bbox_m": {
+          "min": [
+            -0.217,
+            0.001,
+            -0.331
+          ],
+          "max": [
+            0.217,
+            0.975,
+            0.245
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          0.434,
+          0.576,
+          0.973
+        ],
+        "polycount": 22013,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "dining_chair_02",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 921075,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2723
+      }
+    ],
+    "bed": [
+      {
+        "id": "GothicBed_01",
+        "note": "ONLY double-width bed on PH (1.49 m wide) but it is an ornate Gothic four-poster - poor style match; consider a procedural box bed",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/GothicBed_01/GothicBed_01_1k.gltf",
+        "gltf_bytes": 2683,
+        "include": {
+          "textures/GothicBed_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicBed_01/GothicBed_01_diff_1k.jpg",
+            "bytes": 116672,
+            "http": 200,
+            "content_length": 116672
+          },
+          "textures/GothicBed_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicBed_01/GothicBed_01_nor_gl_1k.jpg",
+            "bytes": 196568,
+            "http": 200,
+            "content_length": 196568
+          },
+          "GothicBed_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/4k/GothicBed_01/GothicBed_01.bin",
+            "bytes": 658648,
+            "http": 200,
+            "content_length": 658648
+          },
+          "textures/GothicBed_01_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/GothicBed_01/GothicBed_01_arm_1k.jpg",
+            "bytes": 180642,
+            "http": 200,
+            "content_length": 180642
+          }
+        },
+        "total_bytes": 1155213,
+        "total_mb": 1.16,
+        "over_15mb": false,
+        "dims_m": [
+          1.494,
+          1.534,
+          2.04
+        ],
+        "bbox_m": {
+          "min": [
+            -0.711,
+            -0.0,
+            -1.053
+          ],
+          "max": [
+            0.782,
+            1.534,
+            0.987
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          1.494,
+          2.04,
+          1.534
+        ],
+        "polycount": 18741,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "GothicBed_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 1155213,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2683
+      }
+    ],
+    "nightstand": [
+      {
+        "id": "side_table_01",
+        "note": "minimalist light-wood side table with two shelves - works as nightstand",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/side_table_01/side_table_01_1k.gltf",
+        "gltf_bytes": 2700,
+        "include": {
+          "side_table_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/side_table_01/side_table_01.bin",
+            "bytes": 117784,
+            "http": 200,
+            "content_length": 117784
+          },
+          "textures/side_table_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/side_table_01/side_table_01_diff_1k.jpg",
+            "bytes": 183315,
+            "http": 200,
+            "content_length": 183315
+          },
+          "textures/side_table_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/side_table_01/side_table_01_nor_gl_1k.jpg",
+            "bytes": 71744,
+            "http": 200,
+            "content_length": 71744
+          },
+          "textures/side_table_01_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/side_table_01/side_table_01_arm_1k.jpg",
+            "bytes": 129725,
+            "http": 200,
+            "content_length": 129725
+          }
+        },
+        "total_bytes": 505268,
+        "total_mb": 0.51,
+        "over_15mb": false,
+        "dims_m": [
+          0.55,
+          0.551,
+          0.45
+        ],
+        "bbox_m": {
+          "min": [
+            -0.275,
+            -0.002,
+            -0.225
+          ],
+          "max": [
+            0.275,
+            0.548,
+            0.225
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          0.55,
+          0.45,
+          0.551
+        ],
+        "polycount": 2756,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "side_table_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 505268,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2700
+      }
+    ],
+    "bar_stool": [
+      {
+        "id": "metal_stool_01",
+        "note": "tall industrial round stool, 0.88 m seat height",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/metal_stool_01/metal_stool_01_1k.gltf",
+        "gltf_bytes": 2790,
+        "include": {
+          "textures/metal_stool_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_stool_01/metal_stool_01_nor_gl_1k.jpg",
+            "bytes": 667394,
+            "http": 200,
+            "content_length": 667394
+          },
+          "textures/metal_stool_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_stool_01/metal_stool_01_diff_1k.jpg",
+            "bytes": 617390,
+            "http": 200,
+            "content_length": 617390
+          },
+          "textures/metal_stool_01_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/metal_stool_01/metal_stool_01_arm_1k.jpg",
+            "bytes": 783046,
+            "http": 200,
+            "content_length": 783046
+          },
+          "metal_stool_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/metal_stool_01/metal_stool_01.bin",
+            "bytes": 216340,
+            "http": 200,
+            "content_length": 216340
+          }
+        },
+        "total_bytes": 2286960,
+        "total_mb": 2.29,
+        "over_15mb": false,
+        "dims_m": [
+          0.352,
+          0.883,
+          0.355
+        ],
+        "bbox_m": {
+          "min": [
+            -0.176,
+            0.0,
+            -0.177
+          ],
+          "max": [
+            0.176,
+            0.883,
+            0.177
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          0.352,
+          0.355,
+          0.883
+        ],
+        "polycount": 8334,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "metal_stool_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 2286960,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 2790
+      }
+    ],
+    "potted_plant": [
+      {
+        "id": "potted_plant_02",
+        "note": "terracotta pot with broad leaves, 0.84 m",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/potted_plant_02/potted_plant_02_1k.gltf",
+        "gltf_bytes": 6653,
+        "include": {
+          "textures/potted_plant_02_leaves_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_02/potted_plant_02_leaves_diff_1k.jpg",
+            "bytes": 167700,
+            "http": 200,
+            "content_length": 167700
+          },
+          "potted_plant_02.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/potted_plant_02/potted_plant_02.bin",
+            "bytes": 1852244,
+            "http": 200,
+            "content_length": 1852244
+          },
+          "textures/potted_plant_02_pot_rough_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_02/potted_plant_02_pot_rough_1k.jpg",
+            "bytes": 114886,
+            "http": 200,
+            "content_length": 114886
+          },
+          "textures/potted_plant_02_leaves_rough_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_02/potted_plant_02_leaves_rough_1k.jpg",
+            "bytes": 102396,
+            "http": 200,
+            "content_length": 102396
+          },
+          "textures/potted_plant_02_pot_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_02/potted_plant_02_pot_diff_1k.jpg",
+            "bytes": 155244,
+            "http": 200,
+            "content_length": 155244
+          },
+          "textures/potted_plant_02_leaves_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_02/potted_plant_02_leaves_nor_gl_1k.jpg",
+            "bytes": 127232,
+            "http": 200,
+            "content_length": 127232
+          },
+          "textures/potted_plant_02_pot_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_02/potted_plant_02_pot_nor_gl_1k.jpg",
+            "bytes": 108343,
+            "http": 200,
+            "content_length": 108343
+          }
+        },
+        "total_bytes": 2634698,
+        "total_mb": 2.63,
+        "over_15mb": false,
+        "dims_m": [
+          0.701,
+          0.841,
+          0.657
+        ],
+        "bbox_m": {
+          "min": [
+            -0.397,
+            0.0,
+            -0.42
+          ],
+          "max": [
+            0.304,
+            0.841,
+            0.237
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          0.701,
+          0.657,
+          0.841
+        ],
+        "polycount": 69806,
+        "top_level_nodes": [
+          {
+            "node": "potted_plant_02_pot",
+            "size_m": [
+              0.474,
+              0.336,
+              0.474
+            ],
+            "min_y": 0.0,
+            "center_xz": [
+              0.0,
+              0.0
+            ]
+          },
+          {
+            "node": "potted_plant_02_leaves",
+            "size_m": [
+              0.701,
+              0.633,
+              0.643
+            ],
+            "min_y": 0.209,
+            "center_xz": [
+              -0.046,
+              -0.099
+            ]
+          },
+          {
+            "node": "potted_plant_02_dirt",
+            "size_m": [
+              0.414,
+              0.044,
+              0.411
+            ],
+            "min_y": 0.297,
+            "center_xz": [
+              -0.001,
+              -0.002
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "potted_plant_02_pot",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "potted_plant_02_leaves",
+            "alphaMode": "MASK",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "potted_plant_02_leaves",
+            "gltf_alphaMode": "MASK",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_02/potted_plant_02_leaves_alpha_1k.jpg",
+            "bytes": 58451
+          }
+        ],
+        "total_bytes_with_alpha_maps": 2693149,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 6653
+      },
+      {
+        "id": "potted_plant_01",
+        "note": "larger lush plant in terracotta bowl, 1.35 m (heavier)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/potted_plant_01/potted_plant_01_1k.gltf",
+        "gltf_bytes": 7969,
+        "include": {
+          "textures/potted_plant_01_pot_rough_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_01/potted_plant_01_pot_rough_1k.jpg",
+            "bytes": 173192,
+            "http": 200,
+            "content_length": 173192
+          },
+          "textures/potted_plant_01_leaves_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_01/potted_plant_01_leaves_nor_gl_1k.jpg",
+            "bytes": 177105,
+            "http": 200,
+            "content_length": 177105
+          },
+          "textures/potted_plant_01_pot_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_01/potted_plant_01_pot_diff_1k.jpg",
+            "bytes": 204900,
+            "http": 200,
+            "content_length": 204900
+          },
+          "potted_plant_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/potted_plant_01/potted_plant_01.bin",
+            "bytes": 5345188,
+            "http": 200,
+            "content_length": 5345188
+          },
+          "textures/potted_plant_01_leaves_rough_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_01/potted_plant_01_leaves_rough_1k.jpg",
+            "bytes": 91706,
+            "http": 200,
+            "content_length": 91706
+          },
+          "textures/potted_plant_01_pot_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_01/potted_plant_01_pot_nor_gl_1k.jpg",
+            "bytes": 200349,
+            "http": 200,
+            "content_length": 200349
+          },
+          "textures/potted_plant_01_leaves_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_01/potted_plant_01_leaves_diff_1k.jpg",
+            "bytes": 124730,
+            "http": 200,
+            "content_length": 124730
+          }
+        },
+        "total_bytes": 6325139,
+        "total_mb": 6.33,
+        "over_15mb": false,
+        "dims_m": [
+          0.587,
+          1.35,
+          0.634
+        ],
+        "bbox_m": {
+          "min": [
+            -0.338,
+            -0.014,
+            -0.364
+          ],
+          "max": [
+            0.249,
+            1.336,
+            0.27
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          0.589,
+          0.637,
+          1.351
+        ],
+        "polycount": 96030,
+        "top_level_nodes": [
+          {
+            "node": "potted_plant_01_stem",
+            "size_m": [
+              0.371,
+              0.856,
+              0.393
+            ],
+            "min_y": 0.411,
+            "center_xz": [
+              -0.049,
+              -0.021
+            ]
+          },
+          {
+            "node": "potted_plant_01_pebbles",
+            "size_m": [
+              0.43,
+              0.544,
+              0.431
+            ],
+            "min_y": -0.014,
+            "center_xz": [
+              -0.003,
+              -0.002
+            ]
+          },
+          {
+            "node": "potted_plant_01_pot",
+            "size_m": [
+              0.466,
+              0.531,
+              0.466
+            ],
+            "min_y": 0.0,
+            "center_xz": [
+              0.0,
+              -0.0
+            ]
+          },
+          {
+            "node": "potted_plant_01_leaves",
+            "size_m": [
+              0.587,
+              0.753,
+              0.634
+            ],
+            "min_y": 0.583,
+            "center_xz": [
+              -0.045,
+              -0.047
+            ]
+          }
+        ],
+        "materials": [
+          {
+            "name": "potted_plant_01_pot",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "potted_plant_01_leaves",
+            "alphaMode": "MASK",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": [
+          {
+            "material": "potted_plant_01_leaves",
+            "gltf_alphaMode": "MASK",
+            "alphaMap": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/potted_plant_01/potted_plant_01_leaves_alpha_1k.jpg",
+            "bytes": 73598
+          }
+        ],
+        "total_bytes_with_alpha_maps": 6398737,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 7969
+      }
+    ],
+    "pendant_lamp": [
+      {
+        "id": "modern_ceiling_lamp_01",
+        "note": "modern pendant, frosted glass globe on rod (0.95 m drop)",
+        "gltf": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/1k/modern_ceiling_lamp_01/modern_ceiling_lamp_01_1k.gltf",
+        "gltf_bytes": 6177,
+        "include": {
+          "textures/modern_ceiling_lamp_01_arm_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_ceiling_lamp_01/modern_ceiling_lamp_01_arm_1k.jpg",
+            "bytes": 124022,
+            "http": 200,
+            "content_length": 124022
+          },
+          "textures/modern_ceiling_lamp_01_diff_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_ceiling_lamp_01/modern_ceiling_lamp_01_diff_1k.jpg",
+            "bytes": 79705,
+            "http": 200,
+            "content_length": 79705
+          },
+          "modern_ceiling_lamp_01.bin": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/gltf/8k/modern_ceiling_lamp_01/modern_ceiling_lamp_01.bin",
+            "bytes": 146828,
+            "http": 200,
+            "content_length": 146828
+          },
+          "textures/modern_ceiling_lamp_01_nor_gl_1k.jpg": {
+            "url": "https://dl.polyhaven.org/file/ph-assets/Models/jpg/1k/modern_ceiling_lamp_01/modern_ceiling_lamp_01_nor_gl_1k.jpg",
+            "bytes": 79333,
+            "http": 200,
+            "content_length": 79333
+          }
+        },
+        "total_bytes": 436065,
+        "total_mb": 0.44,
+        "over_15mb": false,
+        "dims_m": [
+          0.432,
+          0.952,
+          0.432
+        ],
+        "bbox_m": {
+          "min": [
+            -0.216,
+            0.221,
+            -0.214
+          ],
+          "max": [
+            0.216,
+            1.173,
+            0.217
+          ]
+        },
+        "info_dims_m_blender_xyz": [
+          0.432,
+          0.432,
+          0.952
+        ],
+        "polycount": 5602,
+        "top_level_nodes": null,
+        "materials": [
+          {
+            "name": "modern_ceiling_lamp_01_glass",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "modern_ceiling_lamp_01",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          },
+          {
+            "name": "modern_ceiling_globe",
+            "alphaMode": "OPAQUE",
+            "doubleSided": true
+          }
+        ],
+        "texture_formats": [
+          ".jpg"
+        ],
+        "alpha_fix": null,
+        "total_bytes_with_alpha_maps": 436065,
+        "extensions_used": [],
+        "relative_paths": {
+          "bin_resolves_on_cdn": true,
+          "textures_resolve_on_cdn": false,
+          "needs_url_modifier": true
+        },
+        "verified": true,
+        "gltf_http": 200,
+        "gltf_content_length": 6177
+      }
+    ]
+  },
+  "no_good_match": {
+    "floor_lamp": "No floor lamp on Poly Haven (Lighting/Floor & Desk only has desk_lamp_arm_01 and industrial_pipe_lamp).",
+    "rug": "No rug/carpet model on Poly Haven (only fabric textures, e.g. carpet textures could be applied to a flat box).",
+    "bed": "No modern double bed. GothicBed_01 (ornate four-poster), old_bed_frame (single metal frame), vintage_day_bed (daybed) are the only beds.",
+    "sofa": "No modern/contemporary sofa; all 5 sofas are vintage (Victorian, Chinese, painted wood).",
+    "trees": "Every conifer is heavy (21.9 MB to 958 MB at 1k) because needles are real geometry and the .bin is shared across all texture resolutions (no LOD / no Draco). None is < 15 MB.",
+    "standing_seam_roof": "No standing-seam texture; closest are corrugated_iron_02 (grey, tintable) and box_profile_metal_sheet (trapezoid, red)."
+  }
+}
